@@ -1,0 +1,69 @@
+﻿@model MachineManagementSystemVer2.Models.RepairCase
+
+@{
+    ViewData["Title"] = "新增維修案件";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label>客戶</label>
+        <select id="CustomerId" class="form-control" asp-items="ViewBag.CustomerId">
+            <option value="">-- 請選擇客戶 --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>廠區</label>
+        <select id="PlantId" class="form-control">
+            <option value="">-- 請先選擇客戶 --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>設備</label>
+        <select asp-for="DeviceId" id="DeviceId" class="form-control">
+            <option value="">-- 請先選擇廠區 --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description">案件描述</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">送出</button>
+</form>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $("#CustomerId").change(function () {
+            var customerId = $(this).val();
+            $("#PlantId").empty().append('<option value="">-- 請選擇廠區 --</option>');
+            $("#DeviceId").empty().append('<option value="">-- 請先選擇廠區 --</option>');
+
+            if (customerId) {
+                $.getJSON('@Url.Action("GetPlants", "RepairCases")', { customerId: customerId }, function (data) {
+                    $.each(data, function (i, plant) {
+                        $("#PlantId").append('<option value="' + plant.plantId + '">' + plant.plantName + '</option>');
+                    });
+                });
+            }
+        });
+
+        $("#PlantId").change(function () {
+            var plantId = $(this).val();
+            $("#DeviceId").empty().append('<option value="">-- 請選擇設備 --</option>');
+
+            if (plantId) {
+                $.getJSON('@Url.Action("GetDevices", "RepairCases")', { plantId: plantId }, function (data) {
+                    $.each(data, function (i, device) {
+                        $("#DeviceId").append('<option value="' + device.deviceId + '">' + device.serialNumber + '</option>');
+                    });
+                });
+            }
+        });
+    </script>
+}
