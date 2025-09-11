@@ -1,0 +1,48 @@
+﻿@model MachineManagementSystemVer2.Models.Device
+
+@{
+    ViewData["Title"] = "設備詳情";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <h4>設備</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DeviceModel)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DeviceModel)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.SerialNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.SerialNumber)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Plant)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Plant.PlantName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ProductionLine)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ProductionLine)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Remark)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Remark)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.DeviceId" class="btn btn-primary">編輯</a>
+    <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+</div>

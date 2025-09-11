@@ -1,0 +1,54 @@
+﻿@model MachineManagementSystemVer2.ViewModels.DeviceEditViewModel
+
+@{
+    ViewData["Title"] = "編輯設備";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>設備</h4>
+<hr />
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="DeviceId" />
+
+            <div class="mb-3">
+                <label asp-for="PlantId" class="control-label"></label>
+                <select asp-for="PlantId" class="form-control" asp-items="Model.PlantList"></select>
+                <span asp-validation-for="PlantId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="SerialNumber" class="control-label"></label>
+                <input asp-for="SerialNumber" class="form-control" />
+                <span asp-validation-for="SerialNumber" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="DeviceModel" class="control-label"></label>
+                <input asp-for="DeviceModel" class="form-control" />
+                <span asp-validation-for="DeviceModel" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ProductionLine" class="control-label"></label>
+                <input asp-for="ProductionLine" class="form-control" />
+                <span asp-validation-for="ProductionLine" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Remark" class="control-label"></label>
+                <textarea asp-for="Remark" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Remark" class="text-danger"></span>
+            </div>
+            <div class="d-flex justify-content-start mt-4">
+                <input type="submit" value="儲存" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary ms-2">返回列表</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
