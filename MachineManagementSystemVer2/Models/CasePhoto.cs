@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MachineManagementSystemVer2.Models
@@ -14,7 +15,7 @@ namespace MachineManagementSystemVer2.Models
 
         [Required]
         [Display(Name = "相關照片")]
-        public byte[] PhotoData { get; set; } // 存 DB
+        public byte[] PhotoData { get; set; } // 將照片的二進位資料直接存入資料庫
 
         [StringLength(200)]
         [Display(Name = "檔案名稱")]
@@ -25,3 +26,4 @@ namespace MachineManagementSystemVer2.Models
         public DateTime UploadedAt { get; set; } = DateTime.Now;
     }
 }
+

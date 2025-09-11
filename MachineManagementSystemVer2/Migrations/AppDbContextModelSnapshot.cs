@@ -30,25 +30,25 @@ namespace MachineManagementSystemVer2.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
 
-                    b.Property<int>("CaseId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Content")
+                    b.Property<string>("CaseComments")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<int>("CaseId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PersonId")
+                    b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
                     b.HasKey("CommentId");
 
                     b.HasIndex("CaseId");
 
-                    b.HasIndex("PersonId");
+                    b.HasIndex("EmployeeId");
 
                     b.ToTable("CaseComments");
                 });
@@ -61,13 +61,10 @@ namespace MachineManagementSystemVer2.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HistoryId"));
 
-                    b.Property<int>("CaseId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("ChangedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ChangedBy")
+                    b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
                     b.Property<string>("NewStatus")
@@ -80,11 +77,14 @@ namespace MachineManagementSystemVer2.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int>("RepairCaseId")
+                        .HasColumnType("int");
+
                     b.HasKey("HistoryId");
 
-                    b.HasIndex("CaseId");
+                    b.HasIndex("EmployeeId");
 
-                    b.HasIndex("ChangedBy");
+                    b.HasIndex("RepairCaseId");
 
                     b.ToTable("CaseHistories");
                 });
@@ -127,22 +127,22 @@ namespace MachineManagementSystemVer2.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CustomerId"));
 
-                    b.Property<string>("Address")
+                    b.Property<string>("CustomerAddress")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("CompanyName")
+                    b.Property<string>("CustomerName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("Phone")
+                    b.Property<string>("CustomerPhone")
                         .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
-                    b.Property<string>("TaxId")
+                    b.Property<string>("CustomerTaxId")
                         .IsRequired()
                         .HasMaxLength(8)
                         .HasColumnType("nvarchar(8)");
@@ -155,18 +155,18 @@ namespace MachineManagementSystemVer2.Migrations
                         new
                         {
                             CustomerId = 1,
-                            Address = "台南市新市區",
-                            CompanyName = "T公司",
-                            Phone = "06-111-2222",
-                            TaxId = "12345678"
+                            CustomerAddress = "台南市新市區",
+                            CustomerName = "T公司",
+                            CustomerPhone = "06-111-2222",
+                            CustomerTaxId = "12345678"
                         },
                         new
                         {
                             CustomerId = 2,
-                            Address = "台北市",
-                            CompanyName = "發哥",
-                            Phone = "06-111-2233",
-                            TaxId = "11223344"
+                            CustomerAddress = "台北市",
+                            CustomerName = "發哥",
+                            CustomerPhone = "06-111-2233",
+                            CustomerTaxId = "11223344"
                         });
                 });
 
@@ -178,7 +178,7 @@ namespace MachineManagementSystemVer2.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DeviceId"));
 
-                    b.Property<string>("Model")
+                    b.Property<string>("DeviceModel")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -187,7 +187,6 @@ namespace MachineManagementSystemVer2.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ProductionLine")
-                        .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
@@ -210,7 +209,7 @@ namespace MachineManagementSystemVer2.Migrations
                         new
                         {
                             DeviceId = 1,
-                            Model = "NXE3400",
+                            DeviceModel = "NXE3400",
                             PlantId = 1,
                             ProductionLine = "H1#1",
                             SerialNumber = "20240901-001"
@@ -218,7 +217,7 @@ namespace MachineManagementSystemVer2.Migrations
                         new
                         {
                             DeviceId = 2,
-                            Model = "NXE3400",
+                            DeviceModel = "NXE3400",
                             PlantId = 2,
                             ProductionLine = "N1#1",
                             SerialNumber = "20240901-002"
@@ -226,29 +225,24 @@ namespace MachineManagementSystemVer2.Migrations
                         new
                         {
                             DeviceId = 3,
-                            Model = "ASM9000",
+                            DeviceModel = "ASM9000",
                             PlantId = 3,
                             ProductionLine = "RC1#1",
                             SerialNumber = "20240901-010"
                         });
                 });
 
-            modelBuilder.Entity("MachineManagementSystemVer2.Models.Person", b =>
+            modelBuilder.Entity("MachineManagementSystemVer2.Models.Employee", b =>
                 {
-                    b.Property<int>("PersonId")
+                    b.Property<int>("EmployeeId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PersonId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeeId"));
 
                     b.Property<string>("Account")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("EmergencyContact")
                         .IsRequired()
@@ -260,94 +254,96 @@ namespace MachineManagementSystemVer2.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
-                    b.Property<DateTime>("HireDate")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("EmployeeAddress")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("EmployeeName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("PasswordHash")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Phone")
+                    b.Property<string>("EmployeePhone")
                         .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
-                    b.Property<string>("Remark")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Role")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
+                    b.Property<string>("EmployeeTitle")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.HasKey("PersonId");
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("datetime2");
 
-                    b.ToTable("Persons");
+                    b.Property<string>("Password")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("EmployeeId");
+
+                    b.ToTable("Employees");
 
                     b.HasData(
                         new
                         {
-                            PersonId = 1,
-                            Address = "屏東市xxxxxxxxx",
+                            EmployeeId = 1,
                             EmergencyContact = "王媽媽",
                             EmergencyPhone = "0987654321",
-                            HireDate = new DateTime(2022, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "王小明",
-                            Phone = "0912345678",
-                            Title = "現場工程師"
+                            EmployeeAddress = "屏東市xxxxxxxxx",
+                            EmployeeName = "王小明",
+                            EmployeePhone = "0912345678",
+                            EmployeeTitle = "現場工程師",
+                            HireDate = new DateTime(2022, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            PersonId = 2,
-                            Address = "新竹市xxxxxx",
+                            EmployeeId = 2,
                             EmergencyContact = "李妻",
                             EmergencyPhone = "03-1234567",
-                            HireDate = new DateTime(2012, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "李主管",
-                            Phone = "0952368741",
-                            Title = "業務經理"
+                            EmployeeAddress = "新竹市xxxxxx",
+                            EmployeeName = "李主管",
+                            EmployeePhone = "0952368741",
+                            EmployeeTitle = "業務經理",
+                            HireDate = new DateTime(2012, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            PersonId = 3,
-                            Address = "高雄市xxxxxxxxx",
+                            EmployeeId = 3,
                             EmergencyContact = "陳媽媽",
                             EmergencyPhone = "0987654321",
-                            HireDate = new DateTime(2022, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "陳大華",
-                            Phone = "0919874585",
-                            Title = "現場工程師"
+                            EmployeeAddress = "高雄市xxxxxxxxx",
+                            EmployeeName = "陳大華",
+                            EmployeePhone = "0919874585",
+                            EmployeeTitle = "現場工程師",
+                            HireDate = new DateTime(2022, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            PersonId = 4,
-                            Address = "苗栗市xxxxxxxxx",
+                            EmployeeId = 4,
                             EmergencyContact = "張嬸",
                             EmergencyPhone = "0987612587",
-                            HireDate = new DateTime(2020, 9, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "張經理",
-                            Phone = "0987258678",
-                            Title = "工程部經理"
+                            EmployeeAddress = "苗栗市xxxxxxxxx",
+                            EmployeeName = "張經理",
+                            EmployeePhone = "0987258678",
+                            EmployeeTitle = "工程部經理",
+                            HireDate = new DateTime(2020, 9, 8, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            PersonId = 5,
-                            Address = "高雄市xxxxxxxxx",
+                            EmployeeId = 5,
                             EmergencyContact = "工程師",
                             EmergencyPhone = "0987612587",
-                            HireDate = new DateTime(2025, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "系統管理員",
-                            Phone = "0987888888",
-                            Title = "系統管理員"
+                            EmployeeAddress = "高雄市xxxxxxxxx",
+                            EmployeeName = "系統管理員",
+                            EmployeePhone = "0987888888",
+                            EmployeeTitle = "系統管理員",
+                            HireDate = new DateTime(2025, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
@@ -359,21 +355,15 @@ namespace MachineManagementSystemVer2.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PlantId"));
 
-                    b.Property<string>("Address")
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PlantAddress")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
-
                     b.Property<string>("PlantCode")
-                        .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
@@ -381,6 +371,11 @@ namespace MachineManagementSystemVer2.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("PlantPhone")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.HasKey("PlantId");
 
@@ -392,29 +387,29 @@ namespace MachineManagementSystemVer2.Migrations
                         new
                         {
                             PlantId = 1,
-                            Address = "新竹市xoxox",
                             CustomerId = 1,
-                            Phone = "03-1224545",
+                            PlantAddress = "新竹市xoxox",
                             PlantCode = "H1",
-                            PlantName = "新竹廠"
+                            PlantName = "新竹廠",
+                            PlantPhone = "03-1224545"
                         },
                         new
                         {
                             PlantId = 2,
-                            Address = "台南市xoxox",
                             CustomerId = 1,
-                            Phone = "06-6548452",
+                            PlantAddress = "台南市xoxox",
                             PlantCode = "N1",
-                            PlantName = "台南廠"
+                            PlantName = "台南廠",
+                            PlantPhone = "06-6548452"
                         },
                         new
                         {
                             PlantId = 3,
-                            Address = "新竹縣xoxox",
                             CustomerId = 2,
-                            Phone = "03-2116555",
+                            PlantAddress = "新竹縣xoxox",
                             PlantCode = "RC1",
-                            PlantName = "竹科研發中心"
+                            PlantName = "竹科研發中心",
+                            PlantPhone = "03-2116555"
                         });
                 });
 
@@ -426,34 +421,38 @@ namespace MachineManagementSystemVer2.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RepairCaseId"));
 
+                    b.Property<string>("CaseRemark")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("CaseStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("CustomerContact")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1500)
+                        .HasColumnType("nvarchar(1500)");
 
                     b.Property<int>("DeviceId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("OccurredAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PersonId")
+                    b.Property<int>("PlantId")
                         .HasColumnType("int");
-
-                    b.Property<int?>("PersonId1")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RepairCaseId");
 
@@ -461,9 +460,9 @@ namespace MachineManagementSystemVer2.Migrations
 
                     b.HasIndex("DeviceId");
 
-                    b.HasIndex("PersonId");
+                    b.HasIndex("EmployeeId");
 
-                    b.HasIndex("PersonId1");
+                    b.HasIndex("PlantId");
 
                     b.ToTable("RepairCases");
 
@@ -471,105 +470,69 @@ namespace MachineManagementSystemVer2.Migrations
                         new
                         {
                             RepairCaseId = 1,
+                            CaseStatus = "OPEN",
                             Description = "客戶反應光刻機曝光後晶圓良率降低，需要檢查光源模組",
                             DeviceId = 1,
+                            EmployeeId = 1,
                             OccurredAt = new DateTime(2024, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PersonId = 1,
-                            Status = "OPEN"
+                            PlantId = 1
                         },
                         new
                         {
                             RepairCaseId = 2,
+                            CaseStatus = "暫置",
                             Description = "蝕刻腔體真空無法維持，懷疑是真空幫浦老化",
                             DeviceId = 2,
+                            EmployeeId = 2,
                             OccurredAt = new DateTime(2024, 9, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PersonId = 2,
-                            Status = "暫置"
+                            PlantId = 2
                         },
                         new
                         {
                             RepairCaseId = 3,
+                            CaseStatus = "CLOSE",
                             Description = "自動測試程式頻繁跳出錯誤代碼，需要檢查控制模組",
                             DeviceId = 3,
+                            EmployeeId = 3,
                             OccurredAt = new DateTime(2024, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PersonId = 3,
-                            Status = "CLOSE"
+                            PlantId = 3
                         });
-                });
-
-            modelBuilder.Entity("MachineManagementSystemVer2.Models.SystemLog", b =>
-                {
-                    b.Property<int>("LogId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LogId"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("ActionTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("IPAddress")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("PersonId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RecordId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TableName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("LogId");
-
-                    b.HasIndex("PersonId");
-
-                    b.ToTable("SystemLogs");
                 });
 
             modelBuilder.Entity("MachineManagementSystemVer2.Models.CaseComment", b =>
                 {
                     b.HasOne("MachineManagementSystemVer2.Models.RepairCase", "RepairCase")
-                        .WithMany("Comments")
+                        .WithMany("CaseComments")
                         .HasForeignKey("CaseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MachineManagementSystemVer2.Models.Person", "Person")
+                    b.HasOne("MachineManagementSystemVer2.Models.Employee", "Employee")
                         .WithMany()
-                        .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Person");
+                    b.Navigation("Employee");
 
                     b.Navigation("RepairCase");
                 });
 
             modelBuilder.Entity("MachineManagementSystemVer2.Models.CaseHistory", b =>
                 {
+                    b.HasOne("MachineManagementSystemVer2.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("MachineManagementSystemVer2.Models.RepairCase", "RepairCase")
-                        .WithMany()
-                        .HasForeignKey("CaseId")
+                        .WithMany("CaseHistories")
+                        .HasForeignKey("RepairCaseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MachineManagementSystemVer2.Models.Person", "Person")
-                        .WithMany()
-                        .HasForeignKey("ChangedBy")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Person");
+                    b.Navigation("Employee");
 
                     b.Navigation("RepairCase");
                 });
@@ -577,7 +540,7 @@ namespace MachineManagementSystemVer2.Migrations
             modelBuilder.Entity("MachineManagementSystemVer2.Models.CasePhoto", b =>
                 {
                     b.HasOne("MachineManagementSystemVer2.Models.RepairCase", "RepairCase")
-                        .WithMany()
+                        .WithMany("CasePhotos")
                         .HasForeignKey("CaseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -588,7 +551,7 @@ namespace MachineManagementSystemVer2.Migrations
             modelBuilder.Entity("MachineManagementSystemVer2.Models.Device", b =>
                 {
                     b.HasOne("MachineManagementSystemVer2.Models.Plant", "Plant")
-                        .WithMany()
+                        .WithMany("Devices")
                         .HasForeignKey("PlantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -616,33 +579,26 @@ namespace MachineManagementSystemVer2.Migrations
                     b.HasOne("MachineManagementSystemVer2.Models.Device", "Device")
                         .WithMany("RepairCases")
                         .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("MachineManagementSystemVer2.Models.Person", "Person")
-                        .WithMany()
-                        .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("MachineManagementSystemVer2.Models.Person", null)
-                        .WithMany("RepairCases")
-                        .HasForeignKey("PersonId1");
-
-                    b.Navigation("Device");
-
-                    b.Navigation("Person");
-                });
-
-            modelBuilder.Entity("MachineManagementSystemVer2.Models.SystemLog", b =>
-                {
-                    b.HasOne("MachineManagementSystemVer2.Models.Person", "Person")
-                        .WithMany()
-                        .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Person");
+                    b.HasOne("MachineManagementSystemVer2.Models.Employee", "Employee")
+                        .WithMany("RepairCases")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MachineManagementSystemVer2.Models.Plant", "Plant")
+                        .WithMany("RepairCases")
+                        .HasForeignKey("PlantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Device");
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("Plant");
                 });
 
             modelBuilder.Entity("MachineManagementSystemVer2.Models.Customer", b =>
@@ -657,14 +613,25 @@ namespace MachineManagementSystemVer2.Migrations
                     b.Navigation("RepairCases");
                 });
 
-            modelBuilder.Entity("MachineManagementSystemVer2.Models.Person", b =>
+            modelBuilder.Entity("MachineManagementSystemVer2.Models.Employee", b =>
                 {
+                    b.Navigation("RepairCases");
+                });
+
+            modelBuilder.Entity("MachineManagementSystemVer2.Models.Plant", b =>
+                {
+                    b.Navigation("Devices");
+
                     b.Navigation("RepairCases");
                 });
 
             modelBuilder.Entity("MachineManagementSystemVer2.Models.RepairCase", b =>
                 {
-                    b.Navigation("Comments");
+                    b.Navigation("CaseComments");
+
+                    b.Navigation("CaseHistories");
+
+                    b.Navigation("CasePhotos");
                 });
 #pragma warning restore 612, 618
         }

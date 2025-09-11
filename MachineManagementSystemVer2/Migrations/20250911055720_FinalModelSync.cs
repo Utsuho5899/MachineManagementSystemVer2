@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MachineManagementSystemVer2.Migrations
 {
     /// <inheritdoc />
-    public partial class FixRelations : Migration
+    public partial class FinalModelSync : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,10 +19,10 @@ namespace MachineManagementSystemVer2.Migrations
                 {
                     CustomerId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CompanyName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    TaxId = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false)
+                    CustomerName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CustomerTaxId = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    CustomerAddress = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    CustomerPhone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,26 +30,25 @@ namespace MachineManagementSystemVer2.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Persons",
+                name: "Employees",
                 columns: table => new
                 {
-                    PersonId = table.Column<int>(type: "int", nullable: false)
+                    EmployeeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    EmployeeName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     HireDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
+                    EmployeeTitle = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    EmployeeAddress = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    EmployeePhone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     EmergencyContact = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     EmergencyPhone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     Account = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    PasswordHash = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    Remark = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Password = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    Remarks = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Persons", x => x.PersonId);
+                    table.PrimaryKey("PK_Employees", x => x.EmployeeId);
                 });
 
             migrationBuilder.CreateTable(
@@ -59,9 +58,9 @@ namespace MachineManagementSystemVer2.Migrations
                     PlantId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PlantName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    PlantCode = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
+                    PlantCode = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: true),
+                    PlantAddress = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    PlantPhone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -76,30 +75,6 @@ namespace MachineManagementSystemVer2.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SystemLogs",
-                columns: table => new
-                {
-                    LogId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PersonId = table.Column<int>(type: "int", nullable: false),
-                    Action = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    TableName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    RecordId = table.Column<int>(type: "int", nullable: true),
-                    ActionTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IPAddress = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SystemLogs", x => x.LogId);
-                    table.ForeignKey(
-                        name: "FK_SystemLogs_Persons_PersonId",
-                        column: x => x.PersonId,
-                        principalTable: "Persons",
-                        principalColumn: "PersonId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Devices",
                 columns: table => new
                 {
@@ -107,8 +82,8 @@ namespace MachineManagementSystemVer2.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SerialNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     PlantId = table.Column<int>(type: "int", nullable: false),
-                    ProductionLine = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
-                    Model = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ProductionLine = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: true),
+                    DeviceModel = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Remark = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true)
                 },
                 constraints: table =>
@@ -128,15 +103,15 @@ namespace MachineManagementSystemVer2.Migrations
                 {
                     RepairCaseId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CaseStatus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     OccurredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PlantId = table.Column<int>(type: "int", nullable: false),
                     DeviceId = table.Column<int>(type: "int", nullable: false),
-                    PersonId = table.Column<int>(type: "int", nullable: false),
-                    CustomerContact = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CustomerId = table.Column<int>(type: "int", nullable: true),
-                    PersonId1 = table.Column<int>(type: "int", nullable: true)
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    CustomerContact = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(1500)", maxLength: 1500, nullable: false),
+                    CaseRemark = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CustomerId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -151,18 +126,18 @@ namespace MachineManagementSystemVer2.Migrations
                         column: x => x.DeviceId,
                         principalTable: "Devices",
                         principalColumn: "DeviceId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RepairCases_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "EmployeeId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_RepairCases_Persons_PersonId",
-                        column: x => x.PersonId,
-                        principalTable: "Persons",
-                        principalColumn: "PersonId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_RepairCases_Persons_PersonId1",
-                        column: x => x.PersonId1,
-                        principalTable: "Persons",
-                        principalColumn: "PersonId");
+                        name: "FK_RepairCases_Plants_PlantId",
+                        column: x => x.PlantId,
+                        principalTable: "Plants",
+                        principalColumn: "PlantId");
                 });
 
             migrationBuilder.CreateTable(
@@ -172,19 +147,19 @@ namespace MachineManagementSystemVer2.Migrations
                     CommentId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CaseId = table.Column<int>(type: "int", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    CaseComments = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PersonId = table.Column<int>(type: "int", nullable: false)
+                    EmployeeId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CaseComments", x => x.CommentId);
                     table.ForeignKey(
-                        name: "FK_CaseComments_Persons_PersonId",
-                        column: x => x.PersonId,
-                        principalTable: "Persons",
-                        principalColumn: "PersonId",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_CaseComments_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "EmployeeId",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_CaseComments_RepairCases_CaseId",
                         column: x => x.CaseId,
@@ -199,24 +174,24 @@ namespace MachineManagementSystemVer2.Migrations
                 {
                     HistoryId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CaseId = table.Column<int>(type: "int", nullable: false),
+                    RepairCaseId = table.Column<int>(type: "int", nullable: false),
                     OldStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     NewStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     ChangedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ChangedBy = table.Column<int>(type: "int", nullable: false)
+                    EmployeeId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CaseHistories", x => x.HistoryId);
                     table.ForeignKey(
-                        name: "FK_CaseHistories_Persons_ChangedBy",
-                        column: x => x.ChangedBy,
-                        principalTable: "Persons",
-                        principalColumn: "PersonId",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_CaseHistories_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "EmployeeId",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_CaseHistories_RepairCases_CaseId",
-                        column: x => x.CaseId,
+                        name: "FK_CaseHistories_RepairCases_RepairCaseId",
+                        column: x => x.RepairCaseId,
                         principalTable: "RepairCases",
                         principalColumn: "RepairCaseId",
                         onDelete: ReferentialAction.Cascade);
@@ -246,7 +221,7 @@ namespace MachineManagementSystemVer2.Migrations
 
             migrationBuilder.InsertData(
                 table: "Customers",
-                columns: new[] { "CustomerId", "Address", "CompanyName", "Phone", "TaxId" },
+                columns: new[] { "CustomerId", "CustomerAddress", "CustomerName", "CustomerPhone", "CustomerTaxId" },
                 values: new object[,]
                 {
                     { 1, "台南市新市區", "T公司", "06-111-2222", "12345678" },
@@ -254,30 +229,30 @@ namespace MachineManagementSystemVer2.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Persons",
-                columns: new[] { "PersonId", "Account", "Address", "EmergencyContact", "EmergencyPhone", "HireDate", "Name", "PasswordHash", "Phone", "Remark", "Role", "Title" },
+                table: "Employees",
+                columns: new[] { "EmployeeId", "Account", "EmergencyContact", "EmergencyPhone", "EmployeeAddress", "EmployeeName", "EmployeePhone", "EmployeeTitle", "HireDate", "Password", "Remarks" },
                 values: new object[,]
                 {
-                    { 1, null, "屏東市xxxxxxxxx", "王媽媽", "0987654321", new DateTime(2022, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "王小明", null, "0912345678", null, null, "現場工程師" },
-                    { 2, null, "新竹市xxxxxx", "李妻", "03-1234567", new DateTime(2012, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "李主管", null, "0952368741", null, null, "業務經理" },
-                    { 3, null, "高雄市xxxxxxxxx", "陳媽媽", "0987654321", new DateTime(2022, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "陳大華", null, "0919874585", null, null, "現場工程師" },
-                    { 4, null, "苗栗市xxxxxxxxx", "張嬸", "0987612587", new DateTime(2020, 9, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), "張經理", null, "0987258678", null, null, "工程部經理" },
-                    { 5, null, "高雄市xxxxxxxxx", "工程師", "0987612587", new DateTime(2025, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), "系統管理員", null, "0987888888", null, null, "系統管理員" }
+                    { 1, null, "王媽媽", "0987654321", "屏東市xxxxxxxxx", "王小明", "0912345678", "現場工程師", new DateTime(2022, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
+                    { 2, null, "李妻", "03-1234567", "新竹市xxxxxx", "李主管", "0952368741", "業務經理", new DateTime(2012, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
+                    { 3, null, "陳媽媽", "0987654321", "高雄市xxxxxxxxx", "陳大華", "0919874585", "現場工程師", new DateTime(2022, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
+                    { 4, null, "張嬸", "0987612587", "苗栗市xxxxxxxxx", "張經理", "0987258678", "工程部經理", new DateTime(2020, 9, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
+                    { 5, null, "工程師", "0987612587", "高雄市xxxxxxxxx", "系統管理員", "0987888888", "系統管理員", new DateTime(2025, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null }
                 });
 
             migrationBuilder.InsertData(
                 table: "Plants",
-                columns: new[] { "PlantId", "Address", "CustomerId", "Phone", "PlantCode", "PlantName" },
+                columns: new[] { "PlantId", "CustomerId", "PlantAddress", "PlantCode", "PlantName", "PlantPhone" },
                 values: new object[,]
                 {
-                    { 1, "新竹市xoxox", 1, "03-1224545", "H1", "新竹廠" },
-                    { 2, "台南市xoxox", 1, "06-6548452", "N1", "台南廠" },
-                    { 3, "新竹縣xoxox", 2, "03-2116555", "RC1", "竹科研發中心" }
+                    { 1, 1, "新竹市xoxox", "H1", "新竹廠", "03-1224545" },
+                    { 2, 1, "台南市xoxox", "N1", "台南廠", "06-6548452" },
+                    { 3, 2, "新竹縣xoxox", "RC1", "竹科研發中心", "03-2116555" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Devices",
-                columns: new[] { "DeviceId", "Model", "PlantId", "ProductionLine", "Remark", "SerialNumber" },
+                columns: new[] { "DeviceId", "DeviceModel", "PlantId", "ProductionLine", "Remark", "SerialNumber" },
                 values: new object[,]
                 {
                     { 1, "NXE3400", 1, "H1#1", null, "20240901-001" },
@@ -287,12 +262,12 @@ namespace MachineManagementSystemVer2.Migrations
 
             migrationBuilder.InsertData(
                 table: "RepairCases",
-                columns: new[] { "RepairCaseId", "CustomerContact", "CustomerId", "Description", "DeviceId", "Notes", "OccurredAt", "PersonId", "PersonId1", "Status" },
+                columns: new[] { "RepairCaseId", "CaseRemark", "CaseStatus", "CustomerContact", "CustomerId", "Description", "DeviceId", "EmployeeId", "OccurredAt", "PlantId" },
                 values: new object[,]
                 {
-                    { 1, null, null, "客戶反應光刻機曝光後晶圓良率降低，需要檢查光源模組", 1, null, new DateTime(2024, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, null, "OPEN" },
-                    { 2, null, null, "蝕刻腔體真空無法維持，懷疑是真空幫浦老化", 2, null, new DateTime(2024, 9, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, null, "暫置" },
-                    { 3, null, null, "自動測試程式頻繁跳出錯誤代碼，需要檢查控制模組", 3, null, new DateTime(2024, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, null, "CLOSE" }
+                    { 1, null, "OPEN", null, null, "客戶反應光刻機曝光後晶圓良率降低，需要檢查光源模組", 1, 1, new DateTime(2024, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1 },
+                    { 2, null, "暫置", null, null, "蝕刻腔體真空無法維持，懷疑是真空幫浦老化", 2, 2, new DateTime(2024, 9, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 2 },
+                    { 3, null, "CLOSE", null, null, "自動測試程式頻繁跳出錯誤代碼，需要檢查控制模組", 3, 3, new DateTime(2024, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), 3 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -301,19 +276,19 @@ namespace MachineManagementSystemVer2.Migrations
                 column: "CaseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CaseComments_PersonId",
+                name: "IX_CaseComments_EmployeeId",
                 table: "CaseComments",
-                column: "PersonId");
+                column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CaseHistories_CaseId",
+                name: "IX_CaseHistories_EmployeeId",
                 table: "CaseHistories",
-                column: "CaseId");
+                column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CaseHistories_ChangedBy",
+                name: "IX_CaseHistories_RepairCaseId",
                 table: "CaseHistories",
-                column: "ChangedBy");
+                column: "RepairCaseId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CasePhotos_CaseId",
@@ -341,19 +316,14 @@ namespace MachineManagementSystemVer2.Migrations
                 column: "DeviceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RepairCases_PersonId",
+                name: "IX_RepairCases_EmployeeId",
                 table: "RepairCases",
-                column: "PersonId");
+                column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RepairCases_PersonId1",
+                name: "IX_RepairCases_PlantId",
                 table: "RepairCases",
-                column: "PersonId1");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SystemLogs_PersonId",
-                table: "SystemLogs",
-                column: "PersonId");
+                column: "PlantId");
         }
 
         /// <inheritdoc />
@@ -369,16 +339,13 @@ namespace MachineManagementSystemVer2.Migrations
                 name: "CasePhotos");
 
             migrationBuilder.DropTable(
-                name: "SystemLogs");
-
-            migrationBuilder.DropTable(
                 name: "RepairCases");
 
             migrationBuilder.DropTable(
                 name: "Devices");
 
             migrationBuilder.DropTable(
-                name: "Persons");
+                name: "Employees");
 
             migrationBuilder.DropTable(
                 name: "Plants");

@@ -8,21 +8,23 @@ namespace MachineManagementSystemVer2.Models
         [Key]
         public int CommentId { get; set; }
 
-        [ForeignKey("RepairCase")]
+        [Required]
         public int CaseId { get; set; }
+        [ForeignKey("CaseId")]
         public RepairCase RepairCase { get; set; }
 
-        [Required, StringLength(1000)]
+        [Required(ErrorMessage = "新增內容為必填")]
+        [StringLength(1000)]
         [Display(Name = "新增內容")]
-        public string Content { get; set; }
+        public string CaseComments { get; set; }
 
         [Required]
         [Display(Name = "新增日期")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        [ForeignKey("新增人員")]
-        public int PersonId { get; set; }
-        public Person Person { get; set; }
-
-       }
+        [Required]
+        public int EmployeeId { get; set; }
+        [ForeignKey("EmployeeId")] // 修正 ForeignKey 指向正確的屬性
+        public Employee Employee { get; set; }
+    }
 }

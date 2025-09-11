@@ -22,7 +22,7 @@
                 @Html.DisplayNameFor(model => model.ProductionLine)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Model)
+                @Html.DisplayNameFor(model => model.DeviceModel)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Remark)
@@ -37,13 +37,13 @@
                 @Html.DisplayFor(modelItem => item.SerialNumber)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Plant.Address)
+                    @Html.DisplayFor(modelItem => item.Plant)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.ProductionLine)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Model)
+                    @Html.DisplayFor(modelItem => item.DeviceModel)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Remark)

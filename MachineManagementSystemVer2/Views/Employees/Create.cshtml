@@ -1,0 +1,112 @@
+﻿@model MachineManagementSystemVer2.ViewModels.EmployeeCreateViewModel
+
+@{
+    ViewData["Title"] = "新增員工資料";
+}
+
+<style>
+    .form-container {
+        font-size: 16px;
+    }
+
+        .form-container .form-label {
+            font-weight: 600;
+        }
+</style>
+
+<div class="form-container">
+    <h1>@ViewData["Title"]</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-10">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="EmployeeName" class="form-label"></label>
+                        <input asp-for="EmployeeName" class="form-control" />
+                        <span asp-validation-for="EmployeeName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="HireDate" class="form-label"></label>
+                        <input asp-for="HireDate" class="form-control" />
+                        <span asp-validation-for="HireDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="EmployeeTitle" class="form-label"></label>
+                    <input asp-for="EmployeeTitle" class="form-control" />
+                    <span asp-validation-for="EmployeeTitle" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="EmployeeAddress" class="form-label"></label>
+                    <input asp-for="EmployeeAddress" class="form-control" />
+                    <span asp-validation-for="EmployeeAddress" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="EmployeePhone" class="form-label"></label>
+                    <input asp-for="EmployeePhone" class="form-control" />
+                    <span asp-validation-for="EmployeePhone" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="EmergencyContact" class="form-label"></label>
+                        <input asp-for="EmergencyContact" class="form-control" />
+                        <span asp-validation-for="EmergencyContact" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="EmergencyPhone" class="form-label"></label>
+                        <input asp-for="EmergencyPhone" class="form-control" />
+                        <span asp-validation-for="EmergencyPhone" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <h5 class="mt-4">系統登入資訊 (選填)</h5>
+                <hr />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Account" class="form-label"></label>
+                        <input asp-for="Account" class="form-control" />
+                        <span asp-validation-for="Account" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ConfirmPassword" class="form-label"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Remarks" class="form-label"></label>
+                    <textarea asp-for="Remarks" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Remarks" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-start mt-4">
+                    <button type="submit" class="btn btn-primary">儲存員工資料</button>
+                    <a asp-action="Index" class="btn btn-secondary ms-2">返回列表</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

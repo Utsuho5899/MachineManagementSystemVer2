@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MachineManagementSystemVer2.Models
@@ -8,8 +9,9 @@ namespace MachineManagementSystemVer2.Models
         [Key]
         public int HistoryId { get; set; }
 
-        [ForeignKey("RepairCase")]
-        public int CaseId { get; set; }
+        [Required]
+        public int RepairCaseId { get; set; }
+        [ForeignKey("RepairCaseId")]
         public RepairCase RepairCase { get; set; }
 
         [StringLength(20)]
@@ -21,8 +23,9 @@ namespace MachineManagementSystemVer2.Models
         [Required]
         public DateTime ChangedAt { get; set; } = DateTime.Now;
 
-        [ForeignKey("Person")]
-        public int ChangedBy { get; set; }
-        public Person Person { get; set; }
+        [Required]
+        public int EmployeeId { get; set; }
+        [ForeignKey("EmployeeId")]
+        public Employee Employee { get; set; }
     }
 }

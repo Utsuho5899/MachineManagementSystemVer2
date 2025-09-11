@@ -3,27 +3,35 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MachineManagementSystemVer2</title>
+    <title>@ViewData["Title"] - 設備維修管理系統</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/MachineManagementSystemVer2.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MachineManagementSystemVer2</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">設備維修管理系統</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collaㄐpse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">首頁</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Customers" asp-action="Index">客戶管理</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Devices" asp-action="Index">設備管理</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Employees" asp-action="Index">員工管理</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="RepairCases" asp-action="Index">維修案件</a>
                         </li>
                     </ul>
                 </div>
@@ -38,12 +46,20 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - MachineManagementSystemVer2 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - 設備維修管理系統
         </div>
     </footer>
+
+    @* 【關鍵 1】載入 jQuery 和 Bootstrap 的核心腳本 *@
+    @* 這兩個是許多互動功能（包括我們自己的腳本）的基礎 *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @* 【關鍵 2】這是解決問題的魔法！ *@
+    @* 這行程式碼的作用是：如果在某個子頁面 (例如 Create.cshtml) 中定義了名為 "Scripts" 的 section， *@
+    @* 就把那個 section 裡的內容（也就是我們寫的 jQuery 連動選單程式碼）渲染到這裡。 *@
+    @* 如果沒有這一行，我們在 Create.cshtml 寫的所有 JavaScript 都會被忽略。 *@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

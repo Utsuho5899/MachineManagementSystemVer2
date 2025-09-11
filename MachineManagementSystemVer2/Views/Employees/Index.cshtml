@@ -1,0 +1,54 @@
+﻿@model IEnumerable<MachineManagementSystemVer2.Models.Employee>
+
+@{
+    ViewData["Title"] = "員工列表";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">新增員工</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.EmployeeName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EmployeeTitle)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EmployeePhone)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HireDate)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EmployeeName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EmployeeTitle)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EmployeePhone)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.HireDate)
+                </td>
+                <td>
+                    @* TODO: 之後可以加入編輯/詳情/刪除的連結 *@
+                    <a asp-action="Edit" asp-route-id="@item.EmployeeId">編輯</a> |
+                    <a asp-action="Details" asp-route-id="@item.EmployeeId">詳情</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,3 +1,11 @@
-﻿@using MachineManagementSystemVer2
+﻿@* 這個檔案的功能是告訴專案中所有的 View (.cshtml 檔案) 都要引入或啟用哪些功能。
+  它不需要在每個 View 中單獨引用，系統會自動套用。
+*@
+
+@* 【關鍵 1】引入您專案的命名空間，這樣在 View 中就不用寫完整的類別路徑 *@
+@using MachineManagementSystemVer2
 @using MachineManagementSystemVer2.Models
+@using MachineManagementSystemVer2.ViewModels
+
+@* 【關鍵 2】這就是解決所有問題的魔法！它會啟用 ASP.NET Core MVC 的所有 Tag Helpers (例如 asp-for, asp-action 等) *@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

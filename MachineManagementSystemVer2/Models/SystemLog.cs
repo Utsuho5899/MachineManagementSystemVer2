@@ -6,11 +6,12 @@ namespace MachineManagementSystemVer2.Models
     public class SystemLog
     {
         [Key]
-        public int LogId { get; set; }
+        public int SystemLogId { get; set; }
 
-        [ForeignKey("Person")]
-        public int PersonId { get; set; }
-        public Person Person { get; set; }
+        public int EmployeeId { get; set; }
+
+        [ForeignKey("EmployeeId")]
+        public Employee Employee { get; set; }
 
         [Required, StringLength(100)]
         public string Action { get; set; }

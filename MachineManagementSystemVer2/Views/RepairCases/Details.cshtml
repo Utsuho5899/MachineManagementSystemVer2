@@ -1,60 +1,258 @@
-﻿@model MachineManagementSystemVer2.Models.RepairCase
+﻿@model MachineManagementSystemVer2.ViewModels.RepairCaseDetailViewModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = $"案件詳情 - Case #{Model.RepairCaseId}";
 }
 
-<h1>Details</h1>
+<!-- 引入 Font Awesome 來美化圖示 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
-<div>
-    <h4>RepairCase</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.OccurredAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.OccurredAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Device)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Device.Model)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PersonId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PersonId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CustomerContact)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CustomerContact)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Notes)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Notes)
-        </dd>
-    </dl>
+<style>
+    .details-container {
+        font-size: 16px;
+    }
+
+    .card-header h5 {
+        margin-bottom: 0;
+    }
+
+    .comment-list .list-group-item {
+        border-right: 0;
+        border-left: 0;
+    }
+
+    .comment-meta {
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+
+    #photo-gallery img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        margin: 5px;
+        border: 1px solid #dee2e6;
+        border-radius: .25rem;
+        cursor: pointer;
+    }
+</style>
+
+<div class="details-container">
+
+    <!-- 案件基本資訊 -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h5 class="d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-file-alt me-2"></i>案件基本資訊</span>
+                <span class="badge bg-primary rounded-pill">@Model.CaseStatus</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">案件No.</dt>
+                <dd class="col-sm-9">@Model.RepairCaseId</dd>
+
+                <dt class="col-sm-3">廠區</dt>
+                <dd class="col-sm-9">@Model.PlantName</dd>
+
+                <dt class="col-sm-3">設備</dt>
+                <dd class="col-sm-9">@Model.DeviceName</dd>
+
+                <dt class="col-sm-3">發生時間</dt>
+                <dd class="col-sm-9">@Model.OccurredAt.ToString("yyyy-MM-dd HH:mm")</dd>
+
+                <dt class="col-sm-3">建單人員</dt>
+                <dd class="col-sm-9">@Model.EmployeeName</dd>
+
+                <dt class="col-sm-3">客戶聯絡人</dt>
+                <dd class="col-sm-9">@Model.CustomerContact</dd>
+
+                <dt class="col-sm-3">故障內容描述</dt>
+                <dd class="col-sm-9">@Model.Description</dd>
+
+                <dt class="col-sm-3">備註</dt>
+                <dd class="col-sm-9">@Model.CaseRemark</dd>
+            </dl>
+        </div>
+    </div>
+
+    <!-- 留言管理 -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h5><i class="fas fa-comments me-2"></i>案件留言紀錄</h5>
+        </div>
+        <div class="card-body">
+            <!-- 新增留言表單 -->
+            <form id="addCommentForm" asp-action="AddComment" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="caseId" value="@Model.RepairCaseId" />
+                <div class="mb-3">
+                    <label asp-for="NewCommentContent" class="form-label">新增留言</label>
+                    <textarea asp-for="NewCommentContent" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="NewCommentContent" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-info text-white">送出留言</button>
+                <div id="commentError" class="text-danger mt-2"></div>
+            </form>
+            <hr />
+            <!-- 留言列表 -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6>留言歷史</h6>
+                <div>
+                    <label for="sortOrder" class="form-label-sm me-2">排序:</label>
+                    <select id="sortOrder" class="form-select-sm">
+                        <option value="desc" selected>由新到舊</option>
+                        <option value="asc">由舊到新</option>
+                    </select>
+                </div>
+            </div>
+            <ul id="commentList" class="list-group list-group-flush comment-list">
+                @foreach (var comment in Model.Comments)
+                {
+                    <li class="list-group-item" data-timestamp="@comment.CreatedAt.Ticks">
+                        @* 【同步】更新屬性名稱以顯示留言內容 *@
+                        <p class="mb-1">@comment.CaseComments</p>
+                        <small class="comment-meta">由 @comment.Employee.EmployeeName 於 @comment.CreatedAt.ToString("yyyy-MM-dd HH:mm") 新增</small>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <!-- 照片管理 -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5><i class="fas fa-images me-2"></i>相關照片</h5>
+        </div>
+        <div class="card-body">
+            <form id="addPhotoForm" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="caseId" value="@Model.RepairCaseId" />
+                <div class="mb-3">
+                    <label for="photo" class="form-label">上傳新照片</label>
+                    <input class="form-control" type="file" id="photo" name="photo" accept="image/*">
+                </div>
+                <button type="submit" class="btn btn-success">上傳照片</button>
+                <div id="photoError" class="text-danger mt-2"></div>
+            </form>
+            <hr />
+            <h6>已上傳照片</h6>
+            <div id="photo-gallery" class="d-flex flex-wrap">
+                @foreach (var photo in Model.Photos)
+                {
+                    var base64 = Convert.ToBase64String(photo.PhotoData);
+                    var imgSrc = $"data:image;base64,{base64}";
+                    <img src="@imgSrc" alt="@photo.FileName" title="檔案: @photo.FileName&#xA;上傳於: @photo.UploadedAt.ToString("yyyy-MM-dd HH:mm")" />
+                }
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.RepairCaseId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+
+            // --- 留言排序功能 ---
+            $('#sortOrder').on('change', function() {
+                var order = $(this).val();
+                var list = $('#commentList');
+                var items = list.children('li').get();
+
+                items.sort(function(a, b) {
+                    var keyA = $(a).data('timestamp');
+                    var keyB = $(b).data('timestamp');
+
+                    if (order === 'asc') {
+                        return keyA > keyB ? 1 : -1;
+                    } else {
+                        return keyA < keyB ? 1 : -1;
+                    }
+                });
+
+                $.each(items, function(i, li) {
+                    list.append(li);
+                });
+            });
+
+
+            // --- AJAX 新增留言 ---
+            $('#addCommentForm').on('submit', function(e) {
+                e.preventDefault();
+                $('#commentError').text('');
+
+                var form = $(this);
+                if (!form.valid()) {
+                    return;
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: form.attr('action'),
+                    data: form.serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            // 【同步】更新 JS 中的屬性名稱以處理回傳的 JSON
+                            var newCommentHtml = '<li class="list-group-item" data-timestamp="' + new Date().getTime() + '">' +
+                                '<p class="mb-1">' + response.caseComments + '</p>' +
+                                '<small class="comment-meta">由 ' + response.employeeName + ' 於 ' + response.createdAt + ' 新增</small>' +
+                                '</li>';
+
+                            if ($('#sortOrder').val() === 'desc') {
+                                 $('#commentList').prepend(newCommentHtml);
+                            } else {
+                                 $('#commentList').append(newCommentHtml);
+                            }
+
+                            $('#NewCommentContent').val('');
+                        } else {
+                            $('#commentError').text(response.message);
+                        }
+                    },
+                    error: function() {
+                        $('#commentError').text('與伺服器通訊失敗。');
+                    }
+                });
+            });
+
+            // --- AJAX 上傳照片 ---
+            $('#addPhotoForm').on('submit', function(e) {
+                e.preventDefault();
+                $('#photoError').text('');
+
+                var formData = new FormData(this);
+                var token = $(this).find('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("AddPhoto", "RepairCases")',
+                    data: formData,
+                    headers: {
+                        "RequestVerificationToken": token
+                    },
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        if (response.success) {
+                            var newPhotoHtml = '<img src="' + response.photoSrc + '" alt="' + response.fileName + '" title="檔案: ' + response.fileName + '&#xA;上傳於: ' + response.uploadedAt + '"/>';
+                            $('#photo-gallery').prepend(newPhotoHtml);
+                            $('#photo').val('');
+                        } else {
+                            $('#photoError').text(response.message);
+                        }
+                    },
+                    error: function() {
+                         $('#photoError').text('上傳失敗，請稍後再試。');
+                    }
+                });
+            });
+        });
+    </script>
+}

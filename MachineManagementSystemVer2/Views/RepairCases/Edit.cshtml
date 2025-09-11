@@ -14,9 +14,9 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="RepairCaseId" />
             <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <input asp-for="Status" class="form-control" />
-                <span asp-validation-for="Status" class="text-danger"></span>
+                <label asp-for="CaseStatus" class="control-label"></label>
+                <input asp-for="CaseStatus" class="form-control" />
+                <span asp-validation-for="CaseStatus" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="OccurredAt" class="control-label"></label>
@@ -29,9 +29,9 @@
                 <span asp-validation-for="DeviceId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="PersonId" class="control-label"></label>
-                <input asp-for="PersonId" class="form-control" />
-                <span asp-validation-for="PersonId" class="text-danger"></span>
+                <label asp-for="EmployeeId" class="control-label"></label>
+                <input asp-for="EmployeeId" class="form-control" />
+                <span asp-validation-for="EmployeeId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="CustomerContact" class="control-label"></label>
@@ -44,9 +44,9 @@
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Notes" class="control-label"></label>
-                <input asp-for="Notes" class="form-control" />
-                <span asp-validation-for="Notes" class="text-danger"></span>
+                <label asp-for="CaseRemark" class="control-label"></label>
+                <input asp-for="CaseRemark" class="form-control" />
+                <span asp-validation-for="CaseRemark" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

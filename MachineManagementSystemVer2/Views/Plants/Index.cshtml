@@ -19,10 +19,10 @@
                 @Html.DisplayNameFor(model => model.PlantCode)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Address)
+                @Html.DisplayNameFor(model => model.PlantAddress)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Phone)
+                @Html.DisplayNameFor(model => model.PlantPhone)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Customer)
@@ -40,13 +40,13 @@
                 @Html.DisplayFor(modelItem => item.PlantCode)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Address)
+                    @Html.DisplayFor(modelItem => item.PlantAddress)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Phone)
+                    @Html.DisplayFor(modelItem => item.PlantPhone)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Customer.Address)
+                    @Html.DisplayFor(modelItem => item.Customer.CustomerAddress)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.PlantId">Edit</a> |

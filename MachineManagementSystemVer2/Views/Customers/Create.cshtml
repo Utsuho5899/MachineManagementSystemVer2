@@ -1,39 +1,83 @@
-﻿@model MachineManagementSystemVer2.Models.Customer
+﻿@* 【關鍵 1】確保 @model 指向的是 ViewModel，而不是舊的 Model *@
+@model MachineManagementSystemVer2.ViewModels.CustomerCreateViewModel
 
-<form asp-controller="Plants" asp-action="Create" method="post">
-            <div class="form-group">
-                <label asp-for="CompanyName" class="control-label"></label>
-                <input asp-for="CompanyName" class="form-control" />
-                <span asp-validation-for="CompanyName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TaxId" class="control-label"></label>
-                <input asp-for="TaxId" class="form-control" />
-                <span asp-validation-for="TaxId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Address" class="control-label"></label>
-                <input asp-for="Address" class="form-control" />
-                <span asp-validation-for="Address" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Phone" class="control-label"></label>
-                <input asp-for="Phone" class="form-control" />
-                <span asp-validation-for="Phone" class="text-danger"></span>
-            </div>
-            <hr />
+@{
+    ViewData["Title"] = "新增客戶";
+}
 
-            <button type="submit" class="btn btn-primary">儲存</button>
+<style>
+    /* 確保字體清晰易讀 */
+    .form-container {
+        font-size: 16px;
+    }
 
-            <!-- 🔹 新增廠區按鈕 -->
-            <a asp-controller="Plants" asp-action="Create" class="btn btn-info">新增廠區</a>
+        .form-container .form-label {
+            font-weight: 600;
+        }
+</style>
 
-        </form>
+<div class="form-container">
+    <h1>@ViewData["Title"]</h1>
+    <h4>客戶基本資料</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-10">
+            @* 【關鍵 2】確保 form 標籤的 asp-action 和 method 正確 *@
+            <form asp-action="Create" method="post">
 
-<div>
-    <a asp-action="Index">Back to List</a>
+                @* 這個 Token 用於安全驗證 *@
+                @Html.AntiForgeryToken()
+
+                @* 這裡會顯示所有驗證失敗的錯誤訊息 *@
+                <div asp-validation-summary="All" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CustomerName" class="form-label"></label>
+                        @* 【關鍵 3】asp-for="CustomerName" 會自動產生 name="CustomerName"，與 ViewModel 屬性對應 *@
+                        <input asp-for="CustomerName" class="form-control" placeholder="請輸入完整的公司名稱" />
+                        <span asp-validation-for="CustomerName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CustomerTaxId" class="form-label"></label>
+                        @* 【關鍵 4】asp-for="CustomerTaxId" 會自動產生 name="CustomerTaxId"，與 ViewModel 屬性對應 *@
+                        <input asp-for="CustomerTaxId" class="form-control" placeholder="請輸入8碼數字" />
+                        <span asp-validation-for="CustomerTaxId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="CustomerAddress" class="form-label"></label>
+                    @* 【關鍵 5】asp-for="CustomerAddress" 會自動產生 name="CustomerAddress"，與 ViewModel 屬性對應 *@
+                    <input asp-for="CustomerAddress" class="form-control" placeholder="請輸入公司登記地址" />
+                    <span asp-validation-for="CustomerAddress" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="CustomerPhone" class="form-label"></label>
+                    @* 【關鍵 6】asp-for="CustomerPhone" 會自動產生 name="CustomerPhone"，與 ViewModel 屬性對應 *@
+                    <input asp-for="CustomerPhone" class="form-control" placeholder="格式範例：02-12345678" />
+                    <span asp-validation-for="CustomerPhone" class="text-danger"></span>
+                </div>
+                <hr />
+                <div class="mb-3">
+                    <h5>新增廠區</h5>
+                    <div class="alert alert-info" role="alert">
+                        您必須先建立客戶資料，儲存後系統將自動引導您至此頁面進行廠區新增。
+                    </div>
+                    <button type="button" class="btn btn-success" disabled>新增廠區</button>
+                </div>
+
+                <div class="d-flex justify-content-start mt-4">
+                    <button type="submit" class="btn btn-primary">建立客戶並前往新增廠區</button>
+                    <a asp-action="Index" class="btn btn-secondary ms-2">返回列表</a>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
+

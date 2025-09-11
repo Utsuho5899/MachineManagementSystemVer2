@@ -10,26 +10,23 @@ namespace MachineManagementSystemVer2.Models
 
         [Required(ErrorMessage = "客戶公司名稱必填"), StringLength(50)]
         [Display(Name = "公司名稱")]
-        public string CompanyName { get; set; }
+        public string CustomerName { get; set; }
 
         [Required(ErrorMessage = "統編必填"), StringLength(8)]
         [Display(Name = "統一編號")]
-        public string TaxId { get; set; } // 統一編號
+        public string CustomerTaxId { get; set; } // 統一編號
 
         [Required(ErrorMessage = "公司地址必填"), StringLength(100)]
         [Display(Name = "公司地址")]
-        public string Address { get; set; }
+        public string CustomerAddress { get; set; }
 
         [Required(ErrorMessage = "公司電話必填"), StringLength(15)]
         [Display(Name = "公司電話")]
-        public string Phone { get; set; }
+        public string CustomerPhone { get; set; }
 
         [Display(Name = "廠區")]
-        public ICollection<Plant> Plants { get; set; }
+        public ICollection<Plant> Plants { get; set; } = new List<Plant>();
 
         public ICollection<RepairCase> RepairCases { get; set; } = new List<RepairCase>();
     }
-
-
-
 }

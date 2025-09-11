@@ -1,0 +1,119 @@
+﻿@model MachineManagementSystemVer2.Models.Customer
+
+
+@{
+    ViewData["Title"] = "編輯客戶資料";
+}
+
+<!-- 為了使用圖示，需要引入 Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+<!-- Custom styles for font size -->
+<style>
+    body {
+        font-size: 16px;
+    }
+
+    .table {
+        font-size: 15px;
+    }
+
+    .form-label {
+        font-weight: 600;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10">
+            <h3>@ViewData["Title"]: @Model.CustomerName</h3>
+            <hr />
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="CustomerId" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CustomerName" class="form-label"></label>
+                        <input asp-for="CustomerName" class="form-control" />
+                        <span asp-validation-for="CustomerName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CustomerTaxId" class="form-label"></label>
+                        <input asp-for="CustomerTaxId" class="form-control" />
+                        <span asp-validation-for="CustomerTaxId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="CustomerAddress" class="form-label"></label>
+                    <input asp-for="CustomerAddress" class="form-control" />
+                    <span asp-validation-for="CustomerAddress" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="CustomerPhone" class="form-label"></label>
+                    <input asp-for="CustomerPhone" class="form-control" />
+                    <span asp-validation-for="CustomerPhone" class="text-danger"></span>
+                </div>
+                <div class="d-flex justify-content-start mt-4">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>儲存客戶資料</button>
+                    <a asp-action="Index" class="btn btn-secondary ms-2">返回列表</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 廠區管理區塊 -->
+    <div class="row mt-5">
+        <div class="col-md-10">
+            <h4><i class="fas fa-industry me-2"></i>廠區管理</h4>
+            <hr />
+            <!-- 修改後的按鈕：直接連結到 Plants/Create 頁面 -->
+            <p>
+                <a asp-controller="Plants" asp-action="Create" asp-route-customerId="@Model.CustomerId" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>新增廠區
+                </a>
+            </p>
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>廠區名稱</th>
+                        <th>廠區代碼</th>
+                        <th>廠區地址</th>
+                        <th>廠區電話</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Plants != null && Model.Plants.Any())
+                    {
+                        @foreach (var plant in Model.Plants)
+                        {
+                            <tr>
+                                <td>@plant.PlantName</td>
+                                <td>@plant.PlantCode</td>
+                                <td>@plant.PlantAddress</td>
+                                <td>@plant.PlantPhone</td>
+                                <td>
+                                    <!-- TODO: 之後可以加入編輯/刪除廠區的功能 -->
+                                    <a href="#" class="btn btn-sm btn-outline-primary disabled">編輯</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center">尚未建立任何廠區資料</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

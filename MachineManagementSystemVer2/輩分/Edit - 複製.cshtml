@@ -1,0 +1,171 @@
+﻿@* @model MachineManagementSystemVer2.Models.Customer
+
+@{
+    ViewData["Title"] = "編輯客戶資料";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit">
+            <h4>客戶基本資料</h4>
+            <hr />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="CustomerId" />
+
+            <div class="form-group">
+                <label asp-for="CustomerName" class="control-label"></label>
+                <input asp-for="CustomerName" class="form-control" />
+                <span asp-validation-for="CustomerName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CustomerTaxId" class="control-label"></label>
+                <input asp-for="CustomerTaxId" class="form-control" />
+                <span asp-validation-for="CustomerTaxId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CustomerAddress" class="control-label"></label>
+                <input asp-for="CustomerAddress" class="form-control" />
+                <span asp-validation-for="CustomerAddress" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CustomerPhone" class="control-label"></label>
+                <input asp-for="CustomerPhone" class="form-control" />
+                <span asp-validation-for="CustomerPhone" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-3">
+                <input type="submit" value="儲存客戶資料" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- 廠區管理區塊 -->
+    <div class="col-md-6">
+        <h4>廠區管理</h4>
+        <hr />
+        <p>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPlantModal">
+                新增廠區
+            </button>
+        </p>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>廠區名稱</th>
+                    <th>廠區代碼</th>
+                    <th>廠區地址</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="plantListTableBody">
+                @foreach (var plant in Model.Plants)
+                {
+                    <tr>
+                        <td>@plant.PlantName</td>
+                        <td>@plant.PlantCode</td>
+                        <td>@plant.PlantAddress</td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-danger" onclick="alert('刪除功能待實作')">刪除</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 新增廠區 Modal 彈出視窗 (使用 Bootstrap 5 語法) -->
+<div class="modal fade" id="addPlantModal" tabindex="-1" aria-labelledby="addPlantModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPlantModalLabel">新增廠區</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addPlantForm">
+                    @* 這個 Token 是為了符合 Controller 的 [ValidateAntiForgeryToken] *@
+                    @*
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="CustomerId" value="@Model.CustomerId" />
+
+                    <div class="mb-3">
+                        <label for="PlantName" class="form-label">廠區名稱</label>
+                        <input type="text" class="form-control" id="PlantName" name="PlantName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="PlantCode" class="form-label">廠區代碼</label>
+                        <input type="text" class="form-control" id="PlantCode" name="PlantCode">
+                    </div>
+                    <div class="mb-3">
+                        <label for="PlantAddress" class="form-label">廠區地址</label>
+                        <input type="text" class="form-control" id="PlantAddress" name="PlantAddress" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="PlantPhone" class="form-label">廠區電話</label>
+                        <input type="text" class="form-control" id="PlantPhone" name="PlantPhone">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" class="btn btn-primary" id="savePlantBtn">儲存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <!-- 修正: 為了修復 "$ is not defined" 錯誤，在此明確載入 jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            $('#savePlantBtn').on('click', function (e) {
+                e.preventDefault();
+
+                var formData = $('#addPlantForm').serialize();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("AddPlant", "Customers")',
+                    data: formData,
+                    headers: {
+                        // AJAX POST 也需要傳遞 AntiForgeryToken
+                        RequestVerificationToken: $('input[name="__RequestVerification-Token"]').val()
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            var newRow = '<tr>' +
+                                '<td>' + response.plant.plantName + '</td>' +
+                                '<td>' + (response.plant.plantCode || '') + '</td>' +
+                                '<td>' + response.plant.plantAddress + '</td>' +
+                                '<td><a href="#" class="btn btn-sm btn-danger" onclick="alert(\'刪除功能待實作\')">刪除</a></td>' +
+                                '</tr>';
+
+                            $('#plantListTableBody').append(newRow);
+
+                            // 關閉 Modal (BS5)
+                            var modal = bootstrap.Modal.getInstance(document.getElementById('addPlantModal'));
+                            modal.hide();
+
+                            $('#addPlantForm')[0].reset();
+                        } else {
+                            alert('新增廠區失敗: ' + response.message);
+                        }
+                    },
+                    error: function () {
+                        alert('與伺服器通訊失敗，請稍後再試。');
+                    }
+                });
+            });
+        });
+    </script>
+} *@

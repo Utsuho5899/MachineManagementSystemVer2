@@ -1,40 +1,66 @@
-﻿@model MachineManagementSystemVer2.Models.Plant
+﻿@model MachineManagementSystemVer2.ViewModels.PlantCreateViewModel
 
-<form asp-action="Create">
-    <div class="form-group">
-        <label asp-for="PlantName" class="control-label"></label>
-        <input asp-for="PlantName" class="form-control" />
-        <span asp-validation-for="PlantName" class="text-danger"></span>
-    </div>
+@{
+    ViewData["Title"] = "新增廠區";
+}
 
-    <div class="form-group">
-        <label asp-for="PlantCode" class="control-label"></label>
-        <input asp-for="PlantCode" class="form-control" />
-        <span asp-validation-for="PlantCode" class="text-danger"></span>
-    </div>
+<style>
+    .form-container {
+        font-size: 16px;
+    }
 
-    <div class="form-group">
-        <label asp-for="Address" class="control-label"></label>
-        <input asp-for="Address" class="form-control" />
-        <span asp-validation-for="Address" class="text-danger"></span>
-    </div>
+        .form-container .form-label {
+            font-weight: 600;
+        }
+</style>
 
-    <div class="form-group">
-        <label asp-for="Phone" class="control-label"></label>
-        <input asp-for="Phone" class="form-control" />
-        <span asp-validation-for="Phone" class="text-danger"></span>
-    </div>
+<div class="form-container">
+    <h1>@ViewData["Title"]</h1>
+    @if (!string.IsNullOrEmpty(Model.CustomerName))
+    {
+        <h4>為客戶：<span class="text-primary">@Model.CustomerName</span></h4>
+    }
+    <hr />
 
-    <div class="form-group">
-        <label asp-for="CustomerId" class="control-label"></label>
-        <select asp-for="CustomerId" class="form-control" asp-items="ViewBag.CustomerId"></select>
-        <span asp-validation-for="CustomerId" class="text-danger"></span>
-    </div>
+    <div class="row">
+        <div class="col-md-10">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    <div class="form-group">
-        <input type="submit" value="儲存" class="btn btn-primary" />
+                @* 這個隱藏欄位是整個功能的關鍵，它會將 CustomerId 傳回給 POST 方法 *@
+                <input type="hidden" asp-for="CustomerId" />
+
+                <div class="mb-3">
+                    <label asp-for="PlantName" class="form-label"></label>
+                    <input asp-for="PlantName" class="form-control" />
+                    <span asp-validation-for="PlantName" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PlantCode" class="form-label"></label>
+                    <input asp-for="PlantCode" class="form-control" />
+                    <span asp-validation-for="PlantCode" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PlantAddress" class="form-label"></label>
+                    <input asp-for="PlantAddress" class="form-control" />
+                    <span asp-validation-for="PlantAddress" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PlantPhone" class="form-label"></label>
+                    <input asp-for="PlantPhone" class="form-control" />
+                    <span asp-validation-for="PlantPhone" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-start mt-4">
+                    <button type="submit" class="btn btn-primary">儲存廠區</button>
+                    @* 返回按鈕現在可以正確地從 Model 取得 CustomerId *@
+                    <a asp-controller="Customers" asp-action="Edit" asp-route-id="@Model.CustomerId" class="btn btn-secondary ms-2">返回客戶資料</a>
+                </div>
+            </form>
+        </div>
     </div>
-</form>
+</div>
 
 @section Scripts {
     @{

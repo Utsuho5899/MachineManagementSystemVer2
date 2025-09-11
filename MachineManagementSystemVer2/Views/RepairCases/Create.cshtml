@@ -1,69 +1,154 @@
-﻿@model MachineManagementSystemVer2.Models.RepairCase
+﻿@model MachineManagementSystemVer2.ViewModels.RepairCaseCreateViewModel
 
 @{
-    ViewData["Title"] = "新增維修案件";
+    ViewData["Title"] = "建立維修案件";
 }
 
-<h2>@ViewData["Title"]</h2>
+<style>
+    .form-container {
+        font-size: 16px;
+    }
 
-<form asp-action="Create" method="post">
-    <div class="form-group">
-        <label>客戶</label>
-        <select id="CustomerId" class="form-control" asp-items="ViewBag.CustomerId">
-            <option value="">-- 請選擇客戶 --</option>
-        </select>
+        .form-container .form-label {
+            font-weight: 600;
+        }
+</style>
+
+<div class="form-container">
+    <h1>@ViewData["Title"]</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-10">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="PlantId" class="form-label"></label>
+                        <select id="plantSelect" asp-for="PlantId" class="form-control" asp-items="Model.PlantList">
+                            <option value="">-- 請先選擇廠區 --</option>
+                        </select>
+                        <span asp-validation-for="PlantId" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DeviceId" class="form-label"></label>
+                        <select id="deviceSelect" asp-for="DeviceId" class="form-control" asp-items="Model.DeviceList">
+                            <option value="">-- 請先選擇廠區 --</option>
+                        </select>
+                        <span asp-validation-for="DeviceId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="OccurredAt" class="form-label"></label>
+                    <input asp-for="OccurredAt" class="form-control" />
+                    <span asp-validation-for="OccurredAt" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CustomerContact" class="form-label"></label>
+                    <input asp-for="CustomerContact" class="form-control" />
+                    <span asp-validation-for="CustomerContact" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CaseRemark" class="form-label"></label>
+                    <textarea asp-for="CaseRemark" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="CaseRemark" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-start mt-4">
+                    <button type="submit" class="btn btn-primary">建立案件</button>
+                    <a asp-action="Index" class="btn btn-secondary ms-2">返回列表</a>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label>廠區</label>
-        <select id="PlantId" class="form-control">
-            <option value="">-- 請先選擇客戶 --</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>設備</label>
-        <select asp-for="DeviceId" id="DeviceId" class="form-control">
-            <option value="">-- 請先選擇廠區 --</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Description">案件描述</label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-    </div>
-
-    <button type="submit" class="btn btn-primary">送出</button>
-</form>
+</div>
 
 @section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $("#CustomerId").change(function () {
-            var customerId = $(this).val();
-            $("#PlantId").empty().append('<option value="">-- 請選擇廠區 --</option>');
-            $("#DeviceId").empty().append('<option value="">-- 請先選擇廠區 --</option>');
+        // 【偵錯】我們將加入 console.log 來追蹤程式碼的執行流程
+        $(document).ready(function () {
+            // 步驟 1: 確認 jQuery 已載入且此區塊已執行
+            console.log("Document is ready. jQuery is loaded.");
 
-            if (customerId) {
-                $.getJSON('@Url.Action("GetPlants", "RepairCases")', { customerId: customerId }, function (data) {
-                    $.each(data, function (i, plant) {
-                        $("#PlantId").append('<option value="' + plant.plantId + '">' + plant.plantName + '</option>');
-                    });
-                });
+            var plantSelect = $('#plantSelect');
+
+            // 步驟 2: 確認是否成功選取到廠區下拉選單
+            if(plantSelect.length) {
+                console.log("Successfully selected the #plantSelect element.");
+            } else {
+                console.error("錯誤：找不到 #plantSelect 這個元素！");
             }
-        });
 
-        $("#PlantId").change(function () {
-            var plantId = $(this).val();
-            $("#DeviceId").empty().append('<option value="">-- 請選擇設備 --</option>');
+            // 步驟 3: 綁定 change 事件
+            plantSelect.on('change', function () {
+                // 步驟 4: 確認 change 事件是否被觸發
+                var plantId = $(this).val();
+                console.log("廠區選擇已變更！ 被選中的廠區 ID: " + plantId);
 
-            if (plantId) {
-                $.getJSON('@Url.Action("GetDevices", "RepairCases")', { plantId: plantId }, function (data) {
-                    $.each(data, function (i, device) {
-                        $("#DeviceId").append('<option value="' + device.deviceId + '">' + device.serialNumber + '</option>');
+                var deviceSelect = $('#deviceSelect');
+                deviceSelect.empty();
+
+                if (!plantId) {
+                    deviceSelect.append($('<option/>', {
+                        value: '',
+                        text: '-- 請先選擇廠區 --'
+                    }));
+                    return;
+                }
+
+                deviceSelect.append($('<option/>', {
+                    value: '',
+                    text: '-- 正在載入設備... --'
+                }));
+
+                // 步驟 5: 確認 AJAX 請求的 URL 是否正確
+                var url = '@Url.Action("GetDevicesByPlant", "RepairCases")';
+                console.log("準備發送 AJAX 請求至 URL: " + url + "?plantId=" + plantId);
+
+                $.getJSON(url, { plantId: plantId }, function (devices) {
+                    // 步驟 6: 確認是否成功接收到後端回傳的資料
+                    console.log("AJAX 請求成功。收到的資料:", devices);
+
+                    deviceSelect.empty();
+                    deviceSelect.append($('<option/>', {
+                        value: '',
+                        text: '-- 請選擇設備 --'
+                    }));
+
+                    $.each(devices, function (index, device) {
+                        deviceSelect.append($('<option/>', {
+                            value: device.deviceId,
+                            text: device.deviceModel
+                        }));
                     });
+                }).fail(function(jqXHR, textStatus, errorThrown) {
+                    // 步驟 7: 如果 AJAX 請求失敗，顯示詳細錯誤
+                    console.error("AJAX 請求失敗！");
+                    console.error("狀態: " + textStatus);
+                    console.error("錯誤: " + errorThrown);
+
+                    deviceSelect.empty();
+                     deviceSelect.append($('<option/>', {
+                        value: '',
+                        text: '-- 載入失敗 --'
+                    }));
                 });
-            }
+            });
         });
     </script>
 }

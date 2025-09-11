@@ -1,71 +1,66 @@
 ﻿@model IEnumerable<MachineManagementSystemVer2.Models.RepairCase>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "維修案件列表";
 }
 
-<h1>Index</h1>
+<h1>@ViewData["Title"]</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">建立新案件</a>
 </p>
-<table class="table">
+
+<table class="table table-hover">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Status)
+                @Html.DisplayNameFor(model => model.RepairCaseId)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.OccurredAt)
+                @Html.DisplayNameFor(model => model.CaseStatus)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Plant)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Device)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PersonId)
+                @Html.DisplayNameFor(model => model.OccurredAt)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CustomerContact)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Notes)
+                @Html.DisplayNameFor(model => model.Employee)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.OccurredAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Device.Model)
-            </td>
-            <td>
-                    @Html.DisplayFor(modelItem => item.PersonId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CustomerContact)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Notes)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.RepairCaseId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.RepairCaseId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.RepairCaseId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RepairCaseId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CaseStatus)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Plant.PlantName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Device.DeviceModel)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OccurredAt)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Employee.EmployeeName)
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.RepairCaseId" class="btn btn-sm btn-outline-info">檢視詳情</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+

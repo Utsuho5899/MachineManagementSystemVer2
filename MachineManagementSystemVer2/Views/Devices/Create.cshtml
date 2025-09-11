@@ -1,52 +1,70 @@
-﻿@model MachineManagementSystemVer2.Models.Device
+﻿@model MachineManagementSystemVer2.ViewModels.DeviceCreateViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "新增設備";
 }
 
-<h1>Create</h1>
+<style>
+    .form-container {
+        font-size: 16px;
+    }
 
-<h4>Device</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="SerialNumber" class="control-label"></label>
-                <input asp-for="SerialNumber" class="form-control" />
-                <span asp-validation-for="SerialNumber" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PlantId" class="control-label"></label>
-                <select asp-for="PlantId" class ="form-control" asp-items="ViewBag.PlantId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="ProductionLine" class="control-label"></label>
-                <input asp-for="ProductionLine" class="form-control" />
-                <span asp-validation-for="ProductionLine" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Model" class="control-label"></label>
-                <input asp-for="Model" class="form-control" />
-                <span asp-validation-for="Model" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Remark" class="control-label"></label>
-                <input asp-for="Remark" class="form-control" />
-                <span asp-validation-for="Remark" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        .form-container .form-label {
+            font-weight: 600;
+        }
+</style>
+
+<div class="form-container">
+    <h1>@ViewData["Title"]</h1>
+    <hr />
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="PlantId" class="form-label"></label>
+                    <select asp-for="PlantId" class="form-control" asp-items="Model.PlantList">
+                        <option value="">-- 請選擇廠區 --</option>
+                    </select>
+                    <span asp-validation-for="PlantId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="SerialNumber" class="form-label"></label>
+                    <input asp-for="SerialNumber" class="form-control" />
+                    <span asp-validation-for="SerialNumber" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DeviceModel" class="form-label"></label>
+                    <input asp-for="DeviceModel" class="form-control" />
+                    <span asp-validation-for="DeviceModel" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ProductionLine" class="form-label"></label>
+                    <input asp-for="ProductionLine" class="form-control" />
+                    <span asp-validation-for="ProductionLine" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Remark" class="form-label"></label>
+                    <textarea asp-for="Remark" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Remark" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-start mt-4">
+                    <input type="submit" value="儲存設備" class="btn btn-primary" />
+                    <a asp-action="Index" class="btn btn-secondary ms-2">返回列表</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
