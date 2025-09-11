@@ -1,19 +1,23 @@
 ﻿using MachineManagementSystemVer2.Data;
 using MachineManagementSystemVer2.Models;
+using MachineManagementSystemVer2.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using MachineManagementSystemVer2.ViewModels;
 using System.Data;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Collections.Generic; // For List
+using System.Linq; // For OrderBy
 
 
 namespace MachineManagementSystemVer2.Controllers
 {
+    [Authorize]
     public class RepairCasesController : Controller
     {
         private readonly AppDbContext _context;
@@ -22,7 +26,7 @@ namespace MachineManagementSystemVer2.Controllers
         {
             _context = context;
         }
-        // 【新增】補上 Index 方法
+
         // GET: RepairCases
         public async Task<IActionResult> Index()
         {
@@ -35,21 +39,29 @@ namespace MachineManagementSystemVer2.Controllers
             return View(repairCases);
         }
 
-        private int _GetLoggedInEmployeeId()
+        private (int id, string name) _GetLoggedInEmployeeInfo()
         {
-            // 假設返回 ID 為 1 的員工
-            return 1;
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userName = User.FindFirstValue(ClaimTypes.Name) ?? "未知人員";
+            if (int.TryParse(userIdString, out int userId))
+            {
+                return (userId, userName);
+            }
+            return (1, "系統管理員(預設)"); // Fallback for testing
         }
 
         // GET: RepairCases/Create
         public async Task<IActionResult> Create()
         {
+            var loggedInUser = _GetLoggedInEmployeeInfo();
             var viewModel = new RepairCaseCreateViewModel
             {
-                PlantList = new SelectList(await _context.Plants.ToListAsync(), "PlantId", "PlantName"),
-                // 初始時設備列表為空，等待使用者選擇廠區
+                CustomerList = new SelectList(await _context.Customers.ToListAsync(), "CustomerId", "CustomerName"),
+                PlantList = new SelectList(new List<Plant>(), "PlantId", "PlantName"),
                 DeviceList = new SelectList(new List<Device>(), "DeviceId", "DeviceModel")
             };
+            // 【修正】使用 ViewBag 來傳遞僅供顯示的資訊
+            ViewBag.LoggedInEmployeeName = loggedInUser.name;
             return View(viewModel);
         }
 
@@ -58,15 +70,29 @@ namespace MachineManagementSystemVer2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(RepairCaseCreateViewModel viewModel)
         {
+            var loggedInUser = _GetLoggedInEmployeeInfo();
+
+            // 【修正】將拆分的日期/時間欄位，手動組合回 DateTime 物件
+            // 這個組合動作必須在 ModelState.IsValid 判斷之前執行
+
+            // 組合 OccurredAt
+            DateTime occurredAt = viewModel.OccurredDate.AddHours(viewModel.OccurredHour).AddMinutes(viewModel.OccurredMinute);
+            DateTime? startTime = viewModel.StartDate.HasValue && viewModel.StartHour.HasValue && viewModel.StartMinute.HasValue ? viewModel.StartDate.Value.AddHours(viewModel.StartHour.Value).AddMinutes(viewModel.StartMinute.Value) : null;
+            DateTime? endTime = viewModel.EndDate.HasValue && viewModel.EndHour.HasValue && viewModel.EndMinute.HasValue ? viewModel.EndDate.Value.AddHours(viewModel.EndHour.Value).AddMinutes(viewModel.EndMinute.Value) : null;
+
+           
             if (ModelState.IsValid)
             {
                 var newCase = new RepairCase
                 {
+                    Title = viewModel.Title, // Add Title mapping
                     CaseStatus = "OPEN",
-                    OccurredAt = viewModel.OccurredAt,
+                    OccurredAt = occurredAt,
+                    StartTime = startTime,
+                    EndTime = endTime,
                     PlantId = viewModel.PlantId,
                     DeviceId = viewModel.DeviceId,
-                    EmployeeId = _GetLoggedInEmployeeId(),
+                    EmployeeId = loggedInUser.id,
                     CustomerContact = viewModel.CustomerContact,
                     Description = viewModel.Description,
                     CaseRemark = viewModel.CaseRemark
@@ -74,16 +100,52 @@ namespace MachineManagementSystemVer2.Controllers
 
                 _context.Add(newCase);
                 await _context.SaveChangesAsync();
+
+                if (viewModel.Photos != null && viewModel.Photos.Count > 0)
+                {
+                    foreach (var photoFile in viewModel.Photos)
+                    {
+                        if (photoFile.Length > 0)
+                        {
+                            byte[] photoData;
+                            using (var memoryStream = new MemoryStream())
+                            {
+                                await photoFile.CopyToAsync(memoryStream);
+                                photoData = memoryStream.ToArray();
+                            }
+                            var newCasePhoto = new CasePhoto
+                            {
+                                CaseId = newCase.RepairCaseId,
+                                FileName = Path.GetFileName(photoFile.FileName),
+                                PhotoData = photoData
+                            };
+                            _context.CasePhotos.Add(newCasePhoto);
+                        }
+                    }
+                    await _context.SaveChangesAsync();
+                }
                 return RedirectToAction("Details", new { id = newCase.RepairCaseId });
             }
 
-            viewModel.PlantList = new SelectList(await _context.Plants.ToListAsync(), "PlantId", "PlantName", viewModel.PlantId);
+            // 如果驗證失敗，重新填充下拉選單
+            viewModel.CustomerList = new SelectList(await _context.Customers.ToListAsync(), "CustomerId", "CustomerName", viewModel.CustomerId);
+            viewModel.PlantList = new SelectList(await _context.Plants.Where(p => p.CustomerId == viewModel.CustomerId).ToListAsync(), "PlantId", "PlantName", viewModel.PlantId);
             viewModel.DeviceList = new SelectList(await _context.Devices.Where(d => d.PlantId == viewModel.PlantId).ToListAsync(), "DeviceId", "DeviceModel", viewModel.DeviceId);
+            ViewBag.LoggedInEmployeeName = loggedInUser.name;
             return View(viewModel);
         }
 
-        // --- AJAX Action ---
-        // GET: /RepairCases/GetDevicesByPlant?plantId=5
+        // --- AJAX Actions for Cascading Dropdowns ---
+        [HttpGet]
+        public async Task<JsonResult> GetPlantsByCustomer(int customerId)
+        {
+            var plants = await _context.Plants
+                                       .Where(p => p.CustomerId == customerId)
+                                       .Select(p => new { p.PlantId, p.PlantName })
+                                       .ToListAsync();
+            return Json(plants);
+        }
+
         [HttpGet]
         public async Task<JsonResult> GetDevicesByPlant(int plantId)
         {
@@ -99,29 +161,72 @@ namespace MachineManagementSystemVer2.Controllers
         {
             var repairCase = await _context.RepairCases
                 .Include(rc => rc.Employee)
-                .Include(rc => rc.Device).ThenInclude(d => d.Plant)
+                .Include(rc => rc.Plant).ThenInclude(p => p.Customer) // 載入客戶
+                .Include(rc => rc.Device)
                 .Include(rc => rc.CaseComments).ThenInclude(cc => cc.Employee)
                 .Include(rc => rc.CasePhotos)
+                .Include(rc => rc.CaseHistories).ThenInclude(ch => ch.Employee) // 載入歷史紀錄
                 .FirstOrDefaultAsync(rc => rc.RepairCaseId == id);
 
-            if (repairCase == null)
-            {
-                return NotFound();
-            }
+            if (repairCase == null) return NotFound();
 
+            // --- 建立整合後的時間軸 (Timeline) ---
+            var timeline = new List<TimelineEntry>();
+
+            // 1. 加入初始的故障內容描述
+
+            timeline.Add(new TimelineEntry
+            {
+                Type = TimelineEntry.EntryType.Initial,
+                Timestamp = repairCase.OccurredAt,
+                Content = repairCase.Description,
+                Author = repairCase.Employee.EmployeeName
+            });
+            
+            // 2. 加入所有的後續留言
+
+            timeline.AddRange(repairCase.CaseComments.Select(c => new TimelineEntry
+            {
+                Type = TimelineEntry.EntryType.Comment,
+                Timestamp = c.CreatedAt,
+                Content = c.CaseComments,
+                Author = c.Employee.EmployeeName
+            }));
+            // 3. 加入所有的狀態變更歷史
+            timeline.AddRange(repairCase.CaseHistories.Select(h => new TimelineEntry
+            {
+                Type = TimelineEntry.EntryType.StatusChange,
+                Timestamp = h.ChangedAt,
+                Author = h.Employee.EmployeeName,
+                OldStatus = h.OldStatus,
+                NewStatus = h.NewStatus
+            }));
+
+            // b. 加入所有的後續留言
+            var statusOptions = new List<string> { "OPEN", "暫置", "CLOSE" };
             var viewModel = new RepairCaseDetailViewModel
             {
                 RepairCaseId = repairCase.RepairCaseId,
+                Title = repairCase.Title,
                 CaseStatus = repairCase.CaseStatus,
                 OccurredAt = repairCase.OccurredAt,
+                StartTime = repairCase.StartTime,
+                EndTime = repairCase.EndTime,
                 CustomerContact = repairCase.CustomerContact,
-                Description = repairCase.Description,
+                //Description = repairCase.Description,
                 CaseRemark = repairCase.CaseRemark,
-                PlantName = repairCase.Device.Plant.PlantName,
+                CustomerName = repairCase.Plant.Customer.CustomerName, // 取得客戶名稱
+                PlantName = repairCase.Plant.PlantName,
                 DeviceName = repairCase.Device.DeviceModel,
-                EmployeeName = repairCase.Employee.EmployeeName,
-                Comments = repairCase.CaseComments.OrderByDescending(c => c.CreatedAt).ToList(),
-                Photos = repairCase.CasePhotos.OrderByDescending(p => p.UploadedAt).ToList()
+                //EmployeeName = repairCase.Employee.EmployeeName,
+                //LatestUpdateBy = latestUpdater,
+                //LatestUpdateTime = latestUpdateTime,
+                CaseTimeline = timeline.OrderByDescending(t => t.Timestamp).ToList(), // 預設由新到舊排列
+                //Comments = repairCase.CaseComments.OrderByDescending(c => c.CreatedAt).ToList(),
+                Photos = repairCase.CasePhotos.OrderByDescending(p => p.UploadedAt).ToList(),
+                //Histories = repairCase.CaseHistories.OrderByDescending(h => h.ChangedAt).ToList(),
+                StatusList = new SelectList(statusOptions, repairCase.CaseStatus),
+                NewStatus = repairCase.CaseStatus
             };
 
             return View(viewModel);
@@ -139,11 +244,10 @@ namespace MachineManagementSystemVer2.Controllers
 
             var newComment = new CaseComment
             {
-                // 【同步】更新屬性名稱以匹配最新的 Model
                 CaseComments = newCommentContent,
                 CreatedAt = DateTime.Now,
                 CaseId = caseId,
-                EmployeeId = _GetLoggedInEmployeeId()
+                EmployeeId = _GetLoggedInEmployeeInfo().id
             };
 
             _context.CaseComments.Add(newComment);
@@ -154,52 +258,392 @@ namespace MachineManagementSystemVer2.Controllers
             return Json(new
             {
                 success = true,
-                // 【同步】更新回傳給前端的 JSON 屬性名稱
                 caseComments = newComment.CaseComments,
                 createdAt = newComment.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
                 employeeName = employee?.EmployeeName ?? "未知人員"
             });
         }
 
-        // POST: RepairCases/AddPhoto (AJAX)
+        // --- 【新增】整合後的 AJAX 更新 Action ---
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddPhoto(int caseId, IFormFile photo)
+        public async Task<IActionResult> UpdateCase(int caseId, string newStatus, string? newCommentContent, IFormFile? newPhoto)
         {
-            if (photo == null || photo.Length == 0)
+            var repairCase = await _context.RepairCases.FindAsync(caseId);
+            if (repairCase == null)
             {
-                return Json(new { success = false, message = "請選擇要上傳的檔案。" });
+                return Json(new { success = false, message = "找不到指定的案件。" });
             }
 
-            byte[] photoData;
-            using (var memoryStream = new MemoryStream())
+            var loggedInUser = _GetLoggedInEmployeeInfo();
+            var hasChanges = false;
+
+            // 1. 處理狀態變更
+            if (repairCase.CaseStatus != newStatus)
             {
-                await photo.CopyToAsync(memoryStream);
-                photoData = memoryStream.ToArray();
+                var history = new CaseHistory
+                {
+                    RepairCaseId = caseId,
+                    OldStatus = repairCase.CaseStatus,
+                    NewStatus = newStatus,
+                    ChangedAt = DateTime.Now,
+                    EmployeeId = loggedInUser.id
+                };
+                _context.CaseHistories.Add(history);
+                repairCase.CaseStatus = newStatus;
+                hasChanges = true;
             }
 
-            var newCasePhoto = new CasePhoto
+            // 2. 處理新增留言
+            if (!string.IsNullOrWhiteSpace(newCommentContent))
             {
-                CaseId = caseId,
-                FileName = photo.FileName,
-                PhotoData = photoData,
-                UploadedAt = DateTime.Now
-            };
+                var comment = new CaseComment
+                {
+                    CaseId = caseId,
+                    CaseComments = newCommentContent,
+                    EmployeeId = loggedInUser.id,
+                    CreatedAt = DateTime.Now
+                };
+                _context.CaseComments.Add(comment);
+                hasChanges = true;
+            }
 
-            _context.CasePhotos.Add(newCasePhoto);
-            await _context.SaveChangesAsync();
-
-            var photoBase64 = Convert.ToBase64String(newCasePhoto.PhotoData);
-
-            return Json(new
+            // 3. 處理照片上傳
+            if (newPhoto != null && newPhoto.Length > 0)
             {
-                success = true,
-                photoId = newCasePhoto.PhotoId,
-                fileName = newCasePhoto.FileName,
-                photoSrc = $"data:{photo.ContentType};base64,{photoBase64}",
-                uploadedAt = newCasePhoto.UploadedAt.ToString("yyyy-MM-dd HH:mm")
-            });
+                byte[] photoData;
+                using (var ms = new MemoryStream())
+                {
+                    await newPhoto.CopyToAsync(ms);
+                    photoData = ms.ToArray();
+                }
+                var photo = new CasePhoto
+                {
+                    CaseId = caseId,
+                    FileName = newPhoto.FileName,
+                    PhotoData = photoData,
+                    UploadedAt = DateTime.Now
+                };
+                _context.CasePhotos.Add(photo);
+                hasChanges = true;
+            }
+
+            if (hasChanges)
+            {
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, message = "案件已更新。" });
+            }
+
+            return Json(new { success = false, message = "沒有任何變更。" });
         }
     }
 }
 
+
+
+//namespace MachineManagementSystemVer2.Controllers
+//{
+//    [Authorize]
+//    public class RepairCasesController : Controller
+//    {
+//        private readonly AppDbContext _context;
+
+//        public RepairCasesController(AppDbContext context)
+//        {
+//            _context = context;
+//        }
+
+//        public async Task<IActionResult> Index()
+//        {
+//            var repairCases = await _context.RepairCases
+//                .Include(r => r.Device)
+//                .Include(r => r.Plant)
+//                .Include(r => r.Employee)
+//                .OrderByDescending(r => r.OccurredAt)
+//                .ToListAsync();
+//            return View(repairCases);
+//        }
+//        // 於 RepairCasesController 類別內新增此 private 方法
+
+//        private (int id, string name) _GetLoggedInEmployeeInfo()
+//        {
+//            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+//            var userName = User.FindFirstValue(ClaimTypes.Name) ?? "未知人員";
+//            if (int.TryParse(userIdString, out int userId))
+//            {
+//                return (userId, userName);
+//            }
+//            return (1, "系統管理員(預設)"); // Fallback
+//        }
+
+
+//        // GET: RepairCases/Create
+//        public async Task<IActionResult> Create()
+//        {
+//            var loggedInUser = _GetLoggedInEmployeeInfo();
+//            var viewModel = new RepairCaseCreateViewModel
+//            {
+//                LoggedInEmployeeName = loggedInUser.name,
+//                CustomerList = new SelectList(await _context.Customers.ToListAsync(), "CustomerId", "CustomerName"),
+//                PlantList = new SelectList(await _context.Plants.ToListAsync(), "PlantId", "PlantName"),
+//                DeviceList = new SelectList(new List<Device>(), "DeviceId", "DeviceModel")
+//            };
+//            return View(viewModel);
+//        }
+
+//        // POST: RepairCases/Create
+//        [HttpPost]
+//        [ValidateAntiForgeryToken]
+//        public async Task<IActionResult> Create(RepairCaseCreateViewModel viewModel)
+//        {
+//            if (ModelState.IsValid)
+//            {
+//                var newCase = new RepairCase
+//                {
+//                    CaseStatus = "OPEN",
+//                    OccurredAt = viewModel.OccurredAt,
+//                    StartTime = viewModel.StartTime,
+//                    EndTime = viewModel.EndTime,
+//                    PlantId = viewModel.PlantId,
+//                    DeviceId = viewModel.DeviceId,
+//                    EmployeeId = loggedInUser.id,
+//                    CustomerContact = viewModel.CustomerContact,
+//                    Description = viewModel.Description,
+//                    CaseRemark = viewModel.CaseRemark
+//                };
+
+//                _context.Add(newCase);
+//                await _context.SaveChangesAsync();
+
+//                await _context.SaveChangesAsync();
+
+//                if (viewModel.Photos != null && viewModel.Photos.Count > 0)
+//                {
+//                    foreach (var photoFile in viewModel.Photos)
+//                    {
+//                        if (photoFile.Length > 0)
+//                        {
+//                            byte[] photoData;
+//                            using (var memoryStream = new MemoryStream())
+//                            {
+//                                await photoFile.CopyToAsync(memoryStream);
+//                                photoData = memoryStream.ToArray();
+//                            }
+//                            var newCasePhoto = new CasePhoto
+//                            {
+//                                CaseId = newCase.RepairCaseId,
+//                                FileName = Path.GetFileName(photoFile.FileName),
+//                                PhotoData = photoData
+//                            };
+//                            _context.CasePhotos.Add(newCasePhoto);
+//                        }
+//                    }
+//                    await _context.SaveChangesAsync();
+//                }
+//                return RedirectToAction("Details", new { id = newCase.RepairCaseId });
+//            }
+
+//            viewModel.CustomerList = new SelectList(await _context.Customers.ToListAsync(), "CustomerId", "CustomerName", viewModel.CustomerId);
+//            viewModel.PlantList = new SelectList(await _context.Plants.ToListAsync(), "PlantId", "PlantName", viewModel.PlantId);
+//            viewModel.DeviceList = new SelectList(await _context.Devices.Where(d => d.PlantId == viewModel.PlantId).ToListAsync(), "DeviceId", "DeviceModel", viewModel.DeviceId);
+//            viewModel.LoggedInEmployeeName = _GetLoggedInEmployeeInfo().name;
+//            return View(viewModel);
+//        }
+
+//        // --- AJAX Action ---
+//        // GET: /RepairCases/GetDevicesByPlant?plantId=5
+//        [HttpGet]
+//        public async Task<JsonResult> GetPlantsByCustomer(int customerId)
+//        {
+//            var plants = await _context.Plants
+//                                       .Where(p => p.CustomerId == customerId)
+//                                       .Select(p => new { p.PlantId, p.PlantName })
+//                                       .ToListAsync();
+//            return Json(plants);
+//        }
+
+//        [HttpGet]
+//        public async Task<JsonResult> GetDevicesByPlant(int plantId)
+//        {
+//            var devices = await _context.Devices
+//                                        .Where(d => d.PlantId == plantId)
+//                                        .Select(d => new { d.DeviceId, d.DeviceModel })
+//                                        .ToListAsync();
+//            return Json(devices);
+//        }
+
+//        // GET: RepairCases/Details/5
+//        public async Task<IActionResult> Details(int id)
+//        {
+//            var repairCase = await _context.RepairCases
+//                .Include(rc => rc.Employee)
+//                .Include(rc => rc.Device).ThenInclude(d => d.Plant)
+//                .Include(rc => rc.CaseComments).ThenInclude(cc => cc.Employee)
+//                .Include(rc => rc.CasePhotos)
+//                .FirstOrDefaultAsync(rc => rc.RepairCaseId == id);
+
+//            if (repairCase == null)
+//            {
+//                return NotFound();
+//            }
+
+//            var viewModel = new RepairCaseDetailViewModel
+//            {
+//                RepairCaseId = repairCase.RepairCaseId,
+//                CaseStatus = repairCase.CaseStatus,
+//                OccurredAt = repairCase.OccurredAt,
+//                StartTime = repairCase.StartTime,
+//                EndTime = repairCase.EndTime,
+//                CustomerContact = repairCase.CustomerContact,
+//                Description = repairCase.Description,
+//                CaseRemark = repairCase.CaseRemark,
+//                PlantName = repairCase.Device.Plant.PlantName,
+//                DeviceName = repairCase.Device.DeviceModel,
+//                EmployeeName = repairCase.Employee.EmployeeName,
+//                Comments = repairCase.CaseComments.OrderByDescending(c => c.CreatedAt).ToList(),
+//                Photos = repairCase.CasePhotos.OrderByDescending(p => p.UploadedAt).ToList()
+//            };
+
+//            return View(viewModel);
+//        }
+
+//        // POST: RepairCases/AddComment (AJAX)
+//        [HttpPost]
+//        [ValidateAntiForgeryToken]
+//        public async Task<IActionResult> AddComment(int caseId, string newCommentContent)
+//        {
+//            if (string.IsNullOrWhiteSpace(newCommentContent))
+//            {
+//                return Json(new { success = false, message = "留言內容不可為空。" });
+//            }
+
+//            var newComment = new CaseComment
+//            {
+//                // 【同步】更新屬性名稱以匹配最新的 Model
+//                CaseComments = newCommentContent,
+//                CreatedAt = DateTime.Now,
+//                CaseId = caseId,
+//                EmployeeId = _GetLoggedInEmployeeId()
+//            };
+//        }
+
+//            // 於 RepairCasesController 類別內新增此 private 方法
+//        private int _GetLoggedInEmployeeId()
+//        {
+//            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+//            if (int.TryParse(userIdString, out int userId))
+//            {
+//                return userId;
+//            }
+//            return 1; // 預設管理員 ID
+//            [HttpPost]
+//            [ValidateAntiForgeryToken]
+//            public async Task<IActionResult> AddComment(int caseId, string newCommentContent)
+//            {
+//                if (string.IsNullOrWhiteSpace(newCommentContent))
+//                {
+//                    return Json(new { success = false, message = "留言內容不可為空。" });
+//                }
+
+//                var newComment = new CaseComment
+//                {
+//                    CaseComments = newCommentContent,
+//                    CreatedAt = DateTime.Now,
+//                    CaseId = caseId,
+//                    EmployeeId = _GetLoggedInEmployeeInfo().id
+//                };
+//                _context.CaseComments.Add(newComment);
+//            await _context.SaveChangesAsync();
+
+//            var employee = await _context.Employees.FindAsync(newComment.EmployeeId);
+
+//            return Json(new
+//            {
+//                success = true,
+//                // 【同步】更新回傳給前端的 JSON 屬性名稱
+//                caseComments = newComment.CaseComments,
+//                createdAt = newComment.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+//                employeeName = employee?.EmployeeName ?? "未知人員"
+//            });
+//        }
+
+//        // POST: RepairCases/AddPhoto (AJAX)
+//        [HttpPost]
+//        [ValidateAntiForgeryToken]
+//        public async Task<IActionResult> AddPhoto(int caseId, IFormFile photo)
+//        {
+//            if (photo == null || photo.Length == 0)
+//            {
+//                return Json(new { success = false, message = "請選擇要上傳的檔案。" });
+//            }
+
+//            byte[] photoData;
+//            using (var memoryStream = new MemoryStream())
+//            {
+//                await photo.CopyToAsync(memoryStream);
+//                photoData = memoryStream.ToArray();
+//            }
+
+//            var newCasePhoto = new CasePhoto
+//            {
+//                CaseId = caseId,
+//                FileName = photo.FileName,
+//                PhotoData = photoData,
+//                UploadedAt = DateTime.Now
+//            };
+
+//            _context.CasePhotos.Add(newCasePhoto);
+//            await _context.SaveChangesAsync();
+
+//            var photoBase64 = Convert.ToBase64String(newCasePhoto.PhotoData);
+
+//            return Json(new
+//            {
+//                success = true,
+//                photoId = newCasePhoto.PhotoId,
+//                fileName = newCasePhoto.FileName,
+//                photoSrc = $"data:{photo.ContentType};base64,{photoBase64}",
+//                uploadedAt = newCasePhoto.UploadedAt.ToString("yyyy-MM-dd HH:mm")
+//            });
+//        }
+//    }
+//}
+// POST: RepairCases/AddPhoto (AJAX)
+//[HttpPost]
+//[ValidateAntiForgeryToken]
+//public async Task<IActionResult> AddPhoto(int caseId, IFormFile photo)
+//{
+//    if (photo == null || photo.Length == 0)
+//    {
+//        return Json(new { success = false, message = "請選擇要上傳的檔案。" });
+//    }
+
+//    byte[] photoData;
+//    using (var memoryStream = new MemoryStream())
+//    {
+//        await photo.CopyToAsync(memoryStream);
+//        photoData = memoryStream.ToArray();
+//    }
+
+//    var newCasePhoto = new CasePhoto
+//    {
+//        CaseId = caseId,
+//        FileName = photo.FileName,
+//        PhotoData = photoData,
+//        UploadedAt = DateTime.Now
+//    };
+
+//    _context.CasePhotos.Add(newCasePhoto);
+//    await _context.SaveChangesAsync();
+
+//    var photoBase64 = Convert.ToBase64String(newCasePhoto.PhotoData);
+
+//    return Json(new
+//    {
+//        success = true,
+//        photoId = newCasePhoto.PhotoId,
+//        fileName = newCasePhoto.FileName,
+//        photoSrc = $"data:{photo.ContentType};base64,{photoBase64}",
+//        uploadedAt = newCasePhoto.UploadedAt.ToString("yyyy-MM-dd HH:mm")
+//    });
+//}

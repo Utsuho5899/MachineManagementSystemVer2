@@ -76,5 +76,62 @@ namespace MachineManagementSystemVer2.Controllers
             // 將包含錯誤訊息的 viewModel 傳回 View
             return View(viewModel);
         }
+
+        // GET: Plants/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var plant = await _context.Plants.FindAsync(id);
+            if (plant == null) return NotFound();
+
+            var viewModel = new PlantEditViewModel
+            {
+                PlantId = plant.PlantId,
+                PlantName = plant.PlantName,
+                PlantAddress = plant.PlantAddress,
+                PlantPhone = plant.PlantPhone,
+                CustomerId = plant.CustomerId // 傳遞 CustomerId 以便返回
+            };
+            return View(viewModel);
+        }
+
+        // POST: Plants/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, PlantEditViewModel viewModel)
+        {
+            if (id != viewModel.PlantId) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var plant = await _context.Plants.FindAsync(id);
+                    if (plant == null) return NotFound();
+
+                    plant.PlantName = viewModel.PlantName;
+                    plant.PlantAddress = viewModel.PlantAddress;
+                    plant.PlantPhone = viewModel.PlantPhone;
+
+                    _context.Update(plant);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!_context.Plants.Any(e => e.PlantId == viewModel.PlantId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                // 編輯完成後，返回到所屬客戶的編輯頁面
+                return RedirectToAction("Edit", "Customers", new { id = viewModel.CustomerId });
+            }
+            return View(viewModel);
+        }
     }
 }

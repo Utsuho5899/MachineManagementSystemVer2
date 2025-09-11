@@ -1,255 +1,269 @@
 ﻿@model MachineManagementSystemVer2.ViewModels.RepairCaseDetailViewModel
+@using MachineManagementSystemVer2.ViewModels
 
 @{
-    ViewData["Title"] = $"案件詳情 - Case #{Model.RepairCaseId}";
+    ViewData["Title"] = $"案件詳情 - {Model.Title}";
 }
 
-<!-- 引入 Font Awesome 來美化圖示 -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
 <style>
-    .details-container {
-        font-size: 16px;
+    /* 【修正】為最外層的容器設定一個較大的基礎字體 */
+    .printable-area {
+        font-size: 1.15rem; /* 從預設的 1rem (16px) 放大 */
+    }
+    .details-grid {
+        display: grid;
+        grid-template-columns: 120px 1fr 120px 1fr;
+        gap: 0.75rem 1.5rem;
+        align-items: center;
     }
 
-    .card-header h5 {
-        margin-bottom: 0;
+        .details-grid dt {
+            font-weight: 600;
+            text-align: right;
+            color: #6c757d;
+        }
+
+    .timeline-entry {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: .375rem;
+        padding: 1rem;
     }
 
-    .comment-list .list-group-item {
-        border-right: 0;
-        border-left: 0;
-    }
-
-    .comment-meta {
+    .timeline-entry-footer {
+        text-align: right;
         font-size: 0.9em;
         color: #6c757d;
+        margin-top: 0.5rem;
+        border-top: 1px dashed #ced4da;
+        padding-top: 0.5rem;
     }
 
-    #photo-gallery img {
-        width: 150px;
-        height: 150px;
-        object-fit: cover;
-        margin: 5px;
-        border: 1px solid #dee2e6;
-        border-radius: .25rem;
+    .timeline-initial-desc {
+        border-left: 5px solid #0d6efd;
+    }
+
+    .timeline-latest-desc {
+        border-left: 5px solid #198754;
+    }
+
+    .toggle-middle-entries {
         cursor: pointer;
+        color: #0d6efd;
+        text-align: center;
+        padding: 0.5rem;
+        border: 1px dashed #0d6efd;
+        margin: 1rem 0;
+    }
+
+        .toggle-middle-entries:hover {
+            background-color: #e7f1ff;
+        }
+
+    @@media print {
+        .no-print {
+            display: none;
+        }
+
+        .printable-area, .printable-area * {
+            visibility: visible;
+        }
+
+        .printable-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
     }
 </style>
 
-<div class="details-container">
-
-    <!-- 案件基本資訊 -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header">
-            <h5 class="d-flex justify-content-between align-items-center">
-                <span><i class="fas fa-file-alt me-2"></i>案件基本資訊</span>
-                <span class="badge bg-primary rounded-pill">@Model.CaseStatus</span>
-            </h5>
+<div class="printable-area">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>@Model.Title</h1>
+        <div>
+            <span class="badge bg-primary rounded-pill fs-6 me-2">@Model.CaseStatus</span>
+            <button onclick="window.print()" class="btn btn-secondary no-print"><i class="fas fa-print me-2"></i>列印</button>
         </div>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header"><h5 class="mb-0">維修案件詳細</h5></div>
         <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3">案件No.</dt>
-                <dd class="col-sm-9">@Model.RepairCaseId</dd>
-
-                <dt class="col-sm-3">廠區</dt>
-                <dd class="col-sm-9">@Model.PlantName</dd>
-
-                <dt class="col-sm-3">設備</dt>
-                <dd class="col-sm-9">@Model.DeviceName</dd>
-
-                <dt class="col-sm-3">發生時間</dt>
-                <dd class="col-sm-9">@Model.OccurredAt.ToString("yyyy-MM-dd HH:mm")</dd>
-
-                <dt class="col-sm-3">建單人員</dt>
-                <dd class="col-sm-9">@Model.EmployeeName</dd>
-
-                <dt class="col-sm-3">客戶聯絡人</dt>
-                <dd class="col-sm-9">@Model.CustomerContact</dd>
-
-                <dt class="col-sm-3">故障內容描述</dt>
-                <dd class="col-sm-9">@Model.Description</dd>
-
-                <dt class="col-sm-3">備註</dt>
-                <dd class="col-sm-9">@Model.CaseRemark</dd>
+            <dl class="details-grid">
+                <dt>客戶</dt>
+                <dd>@Model.CustomerName</dd>
+                <dt>廠區</dt>
+                <dd>@Model.PlantName</dd>
+                <dt>設備</dt>
+                <dd>@Model.DeviceName</dd>
+                <dt>首發時間</dt>
+                <dd>@Model.OccurredAt.ToString("yyyy-MM-dd HH:mm")</dd>
+                <dt>入廠時間</dt>
+                <dd>@Model.StartTime?.ToString("yyyy-MM-dd HH:mm")</dd>
+                <dt>出廠時間</dt>
+                <dd>@Model.EndTime?.ToString("yyyy-MM-dd HH:mm")</dd>
+                <dt>客戶聯絡人</dt>
+                <dd>@Model.CustomerContact</dd>
+                <dt>備註</dt>
+                <dd>@Model.CaseRemark</dd>
             </dl>
         </div>
     </div>
 
-    <!-- 留言管理 -->
-    <div class="card mb-4 shadow-sm">
+    <!-- 3. 描述與歷程大欄位想放到案件後續狀態進展上面 -->
+    <div class="card shadow-sm mb-4">
         <div class="card-header">
-            <h5><i class="fas fa-comments me-2"></i>案件留言紀錄</h5>
+            <a class="h5 text-decoration-none text-dark d-flex justify-content-between" data-bs-toggle="collapse" href="#collapseTimeline" role="button" aria-expanded="true" aria-controls="collapseTimeline">
+                <span><i class="fas fa-stream me-2"></i>案件描述與歷程</span>
+                <i class="fas fa-chevron-down"></i>
+            </a>
         </div>
-        <div class="card-body">
-            <!-- 新增留言表單 -->
-            <form id="addCommentForm" asp-action="AddComment" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="caseId" value="@Model.RepairCaseId" />
-                <div class="mb-3">
-                    <label asp-for="NewCommentContent" class="form-label">新增留言</label>
-                    <textarea asp-for="NewCommentContent" class="form-control" rows="3"></textarea>
-                    <span asp-validation-for="NewCommentContent" class="text-danger"></span>
+        <div class="collapse show" id="collapseTimeline">
+            <div class="card-body">
+                <div class="text-end mb-3 no-print">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-secondary" id="sortOldest">由舊到新</button>
+                        <button type="button" class="btn btn-outline-secondary active" id="sortNewest">由新到舊</button>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-info text-white">送出留言</button>
-                <div id="commentError" class="text-danger mt-2"></div>
-            </form>
-            <hr />
-            <!-- 留言列表 -->
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6>留言歷史</h6>
-                <div>
-                    <label for="sortOrder" class="form-label-sm me-2">排序:</label>
-                    <select id="sortOrder" class="form-select-sm">
-                        <option value="desc" selected>由新到舊</option>
-                        <option value="asc">由舊到新</option>
-                    </select>
+                <!-- 【修正】將所有歷程項目都放在同一個容器中 -->
+                <div id="caseTimelineList">
+                    @foreach (var entry in Model.CaseTimeline)
+                    {
+                        @await Html.PartialAsync("_TimelineEntry", entry)
+                    }
                 </div>
             </div>
-            <ul id="commentList" class="list-group list-group-flush comment-list">
-                @foreach (var comment in Model.Comments)
-                {
-                    <li class="list-group-item" data-timestamp="@comment.CreatedAt.Ticks">
-                        @* 【同步】更新屬性名稱以顯示留言內容 *@
-                        <p class="mb-1">@comment.CaseComments</p>
-                        <small class="comment-meta">由 @comment.Employee.EmployeeName 於 @comment.CreatedAt.ToString("yyyy-MM-dd HH:mm") 新增</small>
-                    </li>
-                }
-            </ul>
         </div>
     </div>
 
-    <!-- 照片管理 -->
-    <div class="card shadow-sm">
-        <div class="card-header">
-            <h5><i class="fas fa-images me-2"></i>相關照片</h5>
-        </div>
+    <!-- 案件後續狀態進展 (表單) -->
+    <div class="card mb-4 shadow-sm no-print">
+        <div class="card-header"><h5 class="mb-0"><i class="fas fa-edit me-2"></i>案件後續狀態進展</h5></div>
         <div class="card-body">
-            <form id="addPhotoForm" enctype="multipart/form-data">
+            <form id="updateCaseForm" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="caseId" value="@Model.RepairCaseId" />
-                <div class="mb-3">
-                    <label for="photo" class="form-label">上傳新照片</label>
-                    <input class="form-control" type="file" id="photo" name="photo" accept="image/*">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="NewStatus" class="form-label"></label>
+                        <select asp-for="NewStatus" class="form-select" asp-items="Model.StatusList"></select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="NewPhoto" class="form-label"></label>
+                        <input asp-for="NewPhoto" class="form-control" type="file" accept="image/*">
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-success">上傳照片</button>
-                <div id="photoError" class="text-danger mt-2"></div>
+                <div class="mb-3">
+                    <label asp-for="NewCommentContent" class="form-label"></label>
+                    <textarea asp-for="NewCommentContent" class="form-control" rows="3" placeholder="請在此輸入詳細的處理過程或狀態說明..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-info text-white">狀態更新</button>
+                <div id="updateError" class="text-danger mt-2"></div>
             </form>
-            <hr />
-            <h6>已上傳照片</h6>
-            <div id="photo-gallery" class="d-flex flex-wrap">
-                @foreach (var photo in Model.Photos)
-                {
-                    var base64 = Convert.ToBase64String(photo.PhotoData);
-                    var imgSrc = $"data:image;base64,{base64}";
-                    <img src="@imgSrc" alt="@photo.FileName" title="檔案: @photo.FileName&#xA;上傳於: @photo.UploadedAt.ToString("yyyy-MM-dd HH:mm")" />
-                }
-            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
+            var timelineList = $('#caseTimelineList');
 
-            // --- 留言排序功能 ---
-            $('#sortOrder').on('change', function() {
-                var order = $(this).val();
-                var list = $('#commentList');
-                var items = list.children('li').get();
+            // --- 【修正】重寫排序和折疊的 JavaScript 邏輯 ---
 
+            // 排序功能
+            function sortTimeline(order) {
+                var items = timelineList.children('.timeline-entry').get();
                 items.sort(function(a, b) {
                     var keyA = $(a).data('timestamp');
                     var keyB = $(b).data('timestamp');
-
-                    if (order === 'asc') {
-                        return keyA > keyB ? 1 : -1;
-                    } else {
-                        return keyA < keyB ? 1 : -1;
-                    }
+                    return (order === 'asc') ? (keyA > keyB ? 1 : -1) : (keyA < keyB ? 1 : -1);
                 });
-
-                $.each(items, function(i, li) {
-                    list.append(li);
+                $.each(items, function(i, el) {
+                    timelineList.append(el); // 重新將排序後的項目加回容器
                 });
-            });
+                setupCollapsing(); // 排序後需要重新設定折疊
+            }
 
+            // 折疊功能
+            function setupCollapsing() {
+                // 先移除舊的按鈕和樣式
+                $('#toggle-button').remove();
+                timelineList.children('.timeline-entry').show().removeClass('middle-entry timeline-latest-desc');
 
-            // --- AJAX 新增留言 ---
-            $('#addCommentForm').on('submit', function(e) {
-                e.preventDefault();
-                $('#commentError').text('');
+                var entries = timelineList.children('.timeline-entry');
+                if (entries.length > 2) {
+                    // 將中間的項目隱藏起來
+                    var middleEntries = entries.slice(1, -1).hide().addClass('middle-entry');
 
-                var form = $(this);
-                if (!form.valid()) {
-                    return;
+                    // 標記最後一個項目
+                    entries.last().addClass('timeline-latest-desc');
+
+                    // 插入展開按鈕
+                    var toggleButton = $('<div id="toggle-button" class="toggle-middle-entries no-print"><i class="fas fa-ellipsis-h"></i> 顯示 ' + middleEntries.length + ' 筆中間歷程</div>');
+                    entries.first().after(toggleButton);
                 }
+            }
 
-                $.ajax({
-                    type: 'POST',
-                    url: form.attr('action'),
-                    data: form.serialize(),
-                    success: function(response) {
-                        if (response.success) {
-                            // 【同步】更新 JS 中的屬性名稱以處理回傳的 JSON
-                            var newCommentHtml = '<li class="list-group-item" data-timestamp="' + new Date().getTime() + '">' +
-                                '<p class="mb-1">' + response.caseComments + '</p>' +
-                                '<small class="comment-meta">由 ' + response.employeeName + ' 於 ' + response.createdAt + ' 新增</small>' +
-                                '</li>';
+            // 初始設定
+            sortTimeline('desc'); // 預設由新到舊
 
-                            if ($('#sortOrder').val() === 'desc') {
-                                 $('#commentList').prepend(newCommentHtml);
-                            } else {
-                                 $('#commentList').append(newCommentHtml);
-                            }
-
-                            $('#NewCommentContent').val('');
-                        } else {
-                            $('#commentError').text(response.message);
-                        }
-                    },
-                    error: function() {
-                        $('#commentError').text('與伺服器通訊失敗。');
-                    }
-                });
+            // 綁定排序按鈕事件
+            $('#sortNewest').on('click', function() {
+                sortTimeline('desc');
+                $(this).addClass('active').siblings().removeClass('active');
+            });
+            $('#sortOldest').on('click', function() {
+                sortTimeline('asc');
+                $(this).addClass('active').siblings().removeClass('active');
             });
 
-            // --- AJAX 上傳照片 ---
-            $('#addPhotoForm').on('submit', function(e) {
+            // 綁定展開/收合按鈕事件 (使用事件委派)
+            $('body').on('click', '#toggle-button', function() {
+                var middleEntries = $('.middle-entry');
+                var isHidden = middleEntries.is(':hidden');
+                middleEntries.slideToggle(); // 使用動畫效果
+
+                var icon = $(this).find('i');
+                var textNode = $(this).contents().filter(function() { return this.nodeType == 3; }).first();
+
+                if (isHidden) {
+                    icon.removeClass('fa-ellipsis-h').addClass('fa-minus');
+                    textNode.replaceWith(" 隱藏中間歷程");
+                } else {
+                    icon.removeClass('fa-minus').addClass('fa-ellipsis-h');
+                    textNode.replaceWith(' 顯示 ' + middleEntries.length + ' 筆中間歷程');
+                }
+            });
+
+            // --- 更新案件的 AJAX (維持不變) ---
+            $('#updateCaseForm').on('submit', function(e) {
                 e.preventDefault();
-                $('#photoError').text('');
-
+                $('#updateError').text('');
                 var formData = new FormData(this);
-                var token = $(this).find('input[name="__RequestVerificationToken"]').val();
-
                 $.ajax({
                     type: 'POST',
-                    url: '@Url.Action("AddPhoto", "RepairCases")',
+                    url: '@Url.Action("UpdateCase", "RepairCases")',
                     data: formData,
-                    headers: {
-                        "RequestVerificationToken": token
-                    },
+                    headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
                     contentType: false,
                     processData: false,
                     success: function(response) {
                         if (response.success) {
-                            var newPhotoHtml = '<img src="' + response.photoSrc + '" alt="' + response.fileName + '" title="檔案: ' + response.fileName + '&#xA;上傳於: ' + response.uploadedAt + '"/>';
-                            $('#photo-gallery').prepend(newPhotoHtml);
-                            $('#photo').val('');
+                            alert('案件已成功更新！');
+                            location.reload();
                         } else {
-                            $('#photoError').text(response.message);
+                            $('#updateError').text(response.message || '更新失敗，請確認輸入內容。');
                         }
                     },
                     error: function() {
-                         $('#photoError').text('上傳失敗，請稍後再試。');
+                         $('#updateError').text('與伺服器通訊失敗。');
                     }
                 });
             });

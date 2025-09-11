@@ -16,6 +16,10 @@
             <th>
                 @Html.DisplayNameFor(model => model.RepairCaseId)
             </th>
+            <!-- 【新增】案件標題欄位 -->
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.CaseStatus)
             </th>
@@ -40,6 +44,10 @@
             <tr>
                 <td>
                     @Html.DisplayFor(modelItem => item.RepairCaseId)
+                </td>
+                <!-- 【新增】顯示案件標題 -->
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.CaseStatus)

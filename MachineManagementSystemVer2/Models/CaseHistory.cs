@@ -25,6 +25,7 @@ namespace MachineManagementSystemVer2.Models
 
         [Required]
         public int EmployeeId { get; set; }
+
         [ForeignKey("EmployeeId")]
         public Employee Employee { get; set; }
     }

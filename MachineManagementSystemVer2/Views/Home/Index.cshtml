@@ -56,6 +56,8 @@
             <thead>
                 <tr>
                     <th>案件No.</th>
+                    <!-- 【新增】案件標題欄位 -->
+                    <th>案件標題</th>
                     <th>狀態</th>
                     <th>廠區</th>
                     <th>設備</th>
@@ -68,6 +70,8 @@
                 {
                     <tr>
                         <td>@item.RepairCaseId</td>
+                        <!-- 【新增】顯示案件標題 -->
+                        <td>@item.Title</td>
                         <td><span class="badge bg-primary">@item.CaseStatus</span></td>
                         <td>@item.Plant.PlantName</td>
                         <td>@item.Device.DeviceModel</td>

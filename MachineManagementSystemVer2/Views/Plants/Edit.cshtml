@@ -1,0 +1,46 @@
+﻿@model MachineManagementSystemVer2.ViewModels.PlantEditViewModel
+
+@{
+    ViewData["Title"] = "編輯廠區資料";
+}
+
+<style>
+    .form-container {
+        font-size: 1.15rem;
+    }
+</style>
+
+<div class="form-container">
+    <h1>@ViewData["Title"]</h1>
+    <hr />
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="PlantId" />
+                <input type="hidden" asp-for="CustomerId" />
+
+                <div class="mb-3">
+                    <label asp-for="PlantName" class="form-label"></label>
+                    <input asp-for="PlantName" class="form-control" />
+                    <span asp-validation-for="PlantName" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PlantAddress" class="form-label"></label>
+                    <input asp-for="PlantAddress" class="form-control" />
+                    <span asp-validation-for="PlantAddress" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PlantPhone" class="form-label"></label>
+                    <input asp-for="PlantPhone" class="form-control" />
+                    <span asp-validation-for="PlantPhone" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-start mt-4">
+                    <input type="submit" value="儲存變更" class="btn btn-primary" />
+                    <a asp-controller="Customers" asp-action="Edit" asp-route-id="@Model.CustomerId" class="btn btn-secondary ms-2">返回客戶資料</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,34 +1,20 @@
 ﻿@model MachineManagementSystemVer2.Models.Customer
 
-
 @{
     ViewData["Title"] = "編輯客戶資料";
 }
 
-<!-- 為了使用圖示，需要引入 Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-
-<!-- Custom styles for font size -->
 <style>
-    body {
-        font-size: 16px;
-    }
-
-    .table {
-        font-size: 15px;
-    }
-
-    .form-label {
-        font-weight: 600;
+    .form-container {
+        font-size: 1.15rem;
     }
 </style>
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-10">
-            <h3>@ViewData["Title"]: @Model.CustomerName</h3>
-            <hr />
-            <form asp-action="Edit">
+<div class="form-container">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><h5 class="mb-0">客戶基本資料</h5></div>
+        <div class="card-body">
+            <form asp-action="Edit" id="customerForm">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="CustomerId" />
 
@@ -44,70 +30,95 @@
                         <span asp-validation-for="CustomerTaxId" class="text-danger"></span>
                     </div>
                 </div>
+
                 <div class="mb-3">
                     <label asp-for="CustomerAddress" class="form-label"></label>
                     <input asp-for="CustomerAddress" class="form-control" />
                     <span asp-validation-for="CustomerAddress" class="text-danger"></span>
                 </div>
+
                 <div class="mb-3">
                     <label asp-for="CustomerPhone" class="form-label"></label>
                     <input asp-for="CustomerPhone" class="form-control" />
                     <span asp-validation-for="CustomerPhone" class="text-danger"></span>
-                </div>
-                <div class="d-flex justify-content-start mt-4">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>儲存客戶資料</button>
-                    <a asp-action="Index" class="btn btn-secondary ms-2">返回列表</a>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- 廠區管理區塊 -->
-    <div class="row mt-5">
-        <div class="col-md-10">
-            <h4><i class="fas fa-industry me-2"></i>廠區管理</h4>
-            <hr />
-            <!-- 修改後的按鈕：直接連結到 Plants/Create 頁面 -->
-            <p>
-                <a asp-controller="Plants" asp-action="Create" asp-route-customerId="@Model.CustomerId" class="btn btn-success">
-                    <i class="fas fa-plus me-2"></i>新增廠區
-                </a>
-            </p>
+    <div class="card shadow-sm">
+        <div class="card-header"><h5 class="mb-0">廠區管理</h5></div>
+        <div class="card-body">
+            <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addPlantModal">
+                <i class="fas fa-plus me-2"></i>新增廠區
+            </button>
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
                         <th>廠區名稱</th>
-                        <th>廠區代碼</th>
                         <th>廠區地址</th>
                         <th>廠區電話</th>
                         <th>操作</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @if (Model.Plants != null && Model.Plants.Any())
-                    {
-                        @foreach (var plant in Model.Plants)
-                        {
-                            <tr>
-                                <td>@plant.PlantName</td>
-                                <td>@plant.PlantCode</td>
-                                <td>@plant.PlantAddress</td>
-                                <td>@plant.PlantPhone</td>
-                                <td>
-                                    <!-- TODO: 之後可以加入編輯/刪除廠區的功能 -->
-                                    <a href="#" class="btn btn-sm btn-outline-primary disabled">編輯</a>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
+                <tbody id="plantTableBody">
+                    @foreach (var plant in Model.Plants)
                     {
                         <tr>
-                            <td colspan="5" class="text-center">尚未建立任何廠區資料</td>
+                            <td>@plant.PlantName</td>
+                            <td>@plant.PlantAddress</td>
+                            <td>@plant.PlantPhone</td>
+                            <td>
+                                @* 【修正】啟用編輯按鈕，並指向 PlantsController *@
+                                <a asp-controller="Plants" asp-action="Edit" asp-route-id="@plant.PlantId" class="btn btn-sm btn-outline-secondary">編輯</a>
+                            </td>
                         </tr>
                     }
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- 【修正】將按鈕移到頁面最下方 -->
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary" form="customerForm">儲存變更</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">返回列表</a>
+    </div>
+</div>
+
+<!-- 新增廠區 Modal -->
+<div class="modal fade" id="addPlantModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">新增廠區</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addPlantForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="CustomerId" value="@Model.CustomerId" />
+
+                    <div class="mb-3">
+                        <label for="plantName" class="form-label">廠區名稱 *</label>
+                        <input type="text" class="form-control" id="plantName" name="PlantName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="plantAddress" class="form-label">廠區地址 *</label>
+                        <input type="text" class="form-control" id="plantAddress" name="PlantAddress" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="plantPhone" class="form-label">廠區電話 *</label>
+                        <input type="text" class="form-control" id="plantPhone" name="PlantPhone" required>
+                    </div>
+                </form>
+                <div id="addPlantError" class="text-danger mt-2"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="savePlantBtn">儲存</button>
+            </div>
         </div>
     </div>
 </div>
@@ -116,4 +127,39 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#savePlantBtn').on('click', function () {
+                var form = $('#addPlantForm');
+                if (!form[0].checkValidity()) {
+                    form[0].reportValidity();
+                    return;
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("AddPlant", "Customers")',
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            // 成功後直接重新整理頁面，以確保新廠區的編輯連結有效
+                            location.reload();
+                        } else {
+                            $('#addPlantError').text(response.message || '儲存失敗。');
+                        }
+                    },
+                    error: function () {
+                        $('#addPlantError').text('與伺服器通訊失敗。');
+                    }
+                });
+            });
+
+            $('#addPlantModal').on('hidden.bs.modal', function () {
+                $('#addPlantForm')[0].reset();
+                $('#addPlantError').text('');
+            });
+        });
+    </script>
 }

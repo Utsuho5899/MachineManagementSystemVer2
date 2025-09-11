@@ -164,6 +164,8 @@ namespace MachineManagementSystemVer2.Data
                 new RepairCase
                 {
                     RepairCaseId = 1,
+                    // 【修正】補上 Title 欄位
+                    Title = "光刻機光源模組檢查",
                     PlantId = 1,
                     Description = "客戶反應光刻機曝光後晶圓良率降低，需要檢查光源模組",
                     CaseStatus = "OPEN",
@@ -174,6 +176,8 @@ namespace MachineManagementSystemVer2.Data
                 new RepairCase
                 {
                     RepairCaseId = 2,
+                    // 【修正】補上 Title 欄位
+                    Title = "蝕刻腔體真空度異常",
                     PlantId = 2,
                     Description = "蝕刻腔體真空無法維持，懷疑是真空幫浦老化",
                     CaseStatus = "暫置",
@@ -184,6 +188,8 @@ namespace MachineManagementSystemVer2.Data
                 new RepairCase
                 {
                     RepairCaseId = 3,
+                    // 【修正】補上 Title 欄位
+                    Title = "自動測試程式錯誤",
                     PlantId = 3,
                     Description = "自動測試程式頻繁跳出錯誤代碼，需要檢查控制模組",
                     CaseStatus = "CLOSE",

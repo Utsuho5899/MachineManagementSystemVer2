@@ -1,42 +1,71 @@
 ﻿@model MachineManagementSystemVer2.Models.Customer
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "客戶詳情";
 }
 
-<h1>Details</h1>
+<style>
+    .details-container {
+        font-size: 1.15rem;
+    }
 
-<div>
-    <h4>Customer</h4>
+    .details-grid {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 0.75rem 1.5rem;
+    }
+
+        .details-grid dt {
+            font-weight: 600;
+            text-align: right;
+            color: #6c757d;
+        }
+</style>
+
+<div class="details-container">
+    <h1>@Model.CustomerName</h1>
     <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CustomerName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CustomerName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CustomerTaxId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CustomerTaxId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CustomerAddress)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CustomerAddress)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CustomerPhone)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CustomerPhone)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.CustomerId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><h5 class="mb-0">客戶詳細資料</h5></div>
+        <div class="card-body">
+            <dl class="details-grid">
+                <dt>@Html.DisplayNameFor(model => model.CustomerName)</dt>
+                <dd>@Html.DisplayFor(model => model.CustomerName)</dd>
+
+                <dt>@Html.DisplayNameFor(model => model.CustomerTaxId)</dt>
+                <dd>@Html.DisplayFor(model => model.CustomerTaxId)</dd>
+
+                <dt>@Html.DisplayNameFor(model => model.CustomerAddress)</dt>
+                <dd>@Html.DisplayFor(model => model.CustomerAddress)</dd>
+
+                <dt>@Html.DisplayNameFor(model => model.CustomerPhone)</dt>
+                <dd>@Html.DisplayFor(model => model.CustomerPhone)</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header"><h5 class="mb-0">旗下廠區列表</h5></div>
+        <div class="card-body">
+            @if (Model.Plants.Any())
+            {
+                <ul class="list-group list-group-flush">
+                    @foreach (var plant in Model.Plants)
+                    {
+                        <li class="list-group-item">@plant.PlantName (@plant.PlantAddress)</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-muted mb-0">此客戶尚無建立任何廠區。</p>
+            }
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Edit" asp-route-id="@Model?.CustomerId" class="btn btn-primary">編輯</a>
+        <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+    </div>
 </div>

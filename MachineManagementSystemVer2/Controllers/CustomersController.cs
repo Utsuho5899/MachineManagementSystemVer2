@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 namespace MachineManagementSystemVer2.Controllers
 {
     namespace MachineManagementSystemVer2.Controllers
@@ -22,42 +23,22 @@ namespace MachineManagementSystemVer2.Controllers
             }
 
             // GET: Customers
-            public async Task<IActionResult> Index(string searchName, string searchTaxId)
+            public async Task<IActionResult> Index()
             {
-                var customersQuery = _context.Customers.AsQueryable();
-
-                if (!string.IsNullOrEmpty(searchName))
-                {
-                    customersQuery = customersQuery.Where(c => c.CustomerName.Contains(searchName));
-                }
-
-                if (!string.IsNullOrEmpty(searchTaxId))
-                {
-                    customersQuery = customersQuery.Where(c => c.CustomerTaxId == searchTaxId);
-                }
-
-                ViewBag.CurrentFilterName = searchName;
-                ViewBag.CurrentFilterTaxId = searchTaxId;
-
-                return View(await customersQuery.ToListAsync());
+                return View(await _context.Customers.ToListAsync());
             }
+
 
             // GET: Customers/Details/5
             public async Task<IActionResult> Details(int? id)
             {
-                if (id == null)
-                {
-                    return NotFound();
-                }
+                if (id == null) return NotFound();
 
                 var customer = await _context.Customers
-                    .Include(c => c.Plants)
+                    .Include(c => c.Plants) // 載入此客戶旗下的所有廠區
                     .FirstOrDefaultAsync(m => m.CustomerId == id);
 
-                if (customer == null)
-                {
-                    return NotFound();
-                }
+                if (customer == null) return NotFound();
 
                 return View(customer);
             }
@@ -85,32 +66,31 @@ namespace MachineManagementSystemVer2.Controllers
 
                     _context.Add(customer);
                     await _context.SaveChangesAsync();
-                    return RedirectToAction("Edit", new { id = customer.CustomerId });
+                    return RedirectToAction(nameof(Index));
                 }
 
-                // 【修正】如果驗證失敗，將 viewModel 物件本身傳回 View，而不是 customer
                 return View(viewModel);
             }
 
 
-            // --- 補上的 Edit (GET) 方法 ---
             // GET: Customers/Edit/5
-            // 顯示編輯客戶的表單，並載入其關聯的廠區資料
             public async Task<IActionResult> Edit(int? id)
             {
-                if (id == null)
-                {
-                    return NotFound();
-                }
+                if (id == null) return NotFound();
 
-                // 使用 Include 一次性載入客戶及其所有廠區
-                var customer = await _context.Customers.Include(c => c.Plants)
-                                                 .FirstOrDefaultAsync(c => c.CustomerId == id);
+                var customer = await _context.Customers
+                    .Include(c => c.Plants)
+                    .FirstOrDefaultAsync(c => c.CustomerId == id);
+                if (customer == null) return NotFound();
 
-                if (customer == null)
-                {
-                    return NotFound();
-                }
+                //var viewModel = new CustomerEditViewModel
+                //{
+                //    CustomerId = customer.CustomerId,
+                //    CustomerName = customer.CustomerName,
+                //    CustomerTaxId = customer.CustomerTaxId,
+                //    CustomerAddress = customer.CustomerAddress,
+                //    CustomerPhone = customer.CustomerPhone
+                //};
                 return View(customer);
             }
 
@@ -118,93 +98,70 @@ namespace MachineManagementSystemVer2.Controllers
             // POST: Customers/Edit/5
             [HttpPost]
             [ValidateAntiForgeryToken]
-            public async Task<IActionResult> Edit(int id, [Bind("CustomerId,CustomerName,CustomerTaxId,CustomerAddress,CustomerPhone")] Customer customer)
+            public async Task<IActionResult> Edit(int id, CustomerEditViewModel viewModel)
             {
-                if (id != customer.CustomerId)
-                {
-                    return NotFound();
-                }
-
-                // Find the existing customer from the database
-                var customerToUpdate = await _context.Customers
-                    .Include(c => c.Plants)
-                    .FirstOrDefaultAsync(c => c.CustomerId == id);
-
-                if (customerToUpdate == null)
-                {
-                    return NotFound();
-                }
+                if (id != viewModel.CustomerId) return NotFound();
 
                 if (ModelState.IsValid)
                 {
-                    // Update only the properties that are bound from the form
-                    customerToUpdate.CustomerName = customer.CustomerName;
-                    customerToUpdate.CustomerTaxId = customer.CustomerTaxId;
-                    customerToUpdate.CustomerAddress = customer.CustomerAddress;
-                    customerToUpdate.CustomerPhone = customer.CustomerPhone;
-
                     try
                     {
-                        _context.Update(customerToUpdate);
+                        var customer = await _context.Customers.FindAsync(id);
+                        if (customer == null) return NotFound();
+
+                        customer.CustomerName = viewModel.CustomerName;
+                        customer.CustomerTaxId = viewModel.CustomerTaxId;
+                        customer.CustomerAddress = viewModel.CustomerAddress;
+                        customer.CustomerPhone = viewModel.CustomerPhone;
+
+                        _context.Update(customer);
                         await _context.SaveChangesAsync();
                     }
                     catch (DbUpdateConcurrencyException)
                     {
-                        if (!CustomerExists(customer.CustomerId))
-                        {
-                            return NotFound();
-                        }
-                        else
-                        {
-                            throw;
-                        }
+                        if (!CustomerExists(viewModel.CustomerId)) return NotFound();
+                        else throw;
                     }
                     return RedirectToAction(nameof(Index));
                 }
-                // If ModelState is invalid, return the view with the customer data including plants
-                return View(customerToUpdate);
+                // 如果驗證失敗，需要重新載入廠區資料才能正確顯示頁面
+                var customerWithPlants = await _context.Customers.Include(c => c.Plants).FirstOrDefaultAsync(c => c.CustomerId == id);
+                return View(customerWithPlants);
             }
 
-            // --- 補上的 Delete (GET) 方法 ---
-            // GET: Customers/Delete/5
-            public async Task<IActionResult> Delete(int? id)
-            {
-                if (id == null)
+                // --- 【新增】用於處理 AJAX 新增廠區的 Action ---
+                [HttpPost]
+                [ValidateAntiForgeryToken]
+                public async Task<IActionResult> AddPlant(Plant plant)
                 {
-                    return NotFound();
+                    // 為了安全性，再次檢查傳入的 CustomerId 是否存在
+                    if (!await _context.Customers.AnyAsync(c => c.CustomerId == plant.CustomerId))
+                    {
+                        return Json(new { success = false, message = "無效的客戶ID。" });
+                    }
+
+                    if (ModelState.IsValid)
+                    {
+                        try
+                        {
+                            _context.Plants.Add(plant);
+                            await _context.SaveChangesAsync();
+                            return Json(new { success = true, plant });
+                        }
+                        catch (Exception ex)
+                        {
+                            return Json(new { success = false, message = ex.Message });
+                        }
+                    }
+                    // 如果模型驗證失敗，回傳錯誤訊息
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    return Json(new { success = false, message = "輸入資料有誤。", errors = errors });
                 }
 
-                var customer = await _context.Customers
-                    .FirstOrDefaultAsync(m => m.CustomerId == id);
-                if (customer == null)
-                {
-                    return NotFound();
-                }
-
-                return View(customer);
-            }
-
-            // --- 補上的 Delete (POST) 方法 ---
-            // POST: Customers/Delete/5
-            [HttpPost, ActionName("Delete")]
-            [ValidateAntiForgeryToken]
-            public async Task<IActionResult> DeleteConfirmed(int id)
-            {
-                var customer = await _context.Customers.FindAsync(id);
-                if (customer != null)
-                {
-                    _context.Customers.Remove(customer);
-                }
-
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-
-            // --- 補上的輔助方法 ---
-            private bool CustomerExists(int id)
+        private bool CustomerExists(int id)
             {
                 return _context.Customers.Any(e => e.CustomerId == id);
             }
         }
+        }
     }
-}

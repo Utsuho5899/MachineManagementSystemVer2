@@ -1,45 +1,60 @@
 ﻿@model MachineManagementSystemVer2.ViewModels.DeviceCreateViewModel
 
-@{
-    ViewData["Title"] = "新增設備";
-}
-
 <style>
     .form-container {
-        font-size: 16px;
+        font-size: 1.15rem;
     }
-
-        .form-container .form-label {
-            font-weight: 600;
-        }
+    /* 【新增】加入下拉選單的箭頭樣式 */
+    select.form-control {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        padding-right: 2.5rem;
+    }
 </style>
 
 <div class="form-container">
     <h1>@ViewData["Title"]</h1>
     <hr />
     <div class="row">
-        <div class="col-md-8">
+        @* 【修正】將寬度調整為 col-md-10 *@
+        <div class="col-md-10">
             <form asp-action="Create">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+                <!-- 【修正】將客戶和廠區選單改為水平並排 -->
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CustomerId" class="form-label"></label>
+                        <select id="customerSelect" asp-for="CustomerId" class="form-control" asp-items="Model.CustomerList">
+                            <option value="">-- 請選擇客戶 --</option>
+                        </select>
+                        <span asp-validation-for="CustomerId" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="PlantId" class="form-label"></label>
+                        <select id="plantSelect" asp-for="PlantId" class="form-control" asp-items="Model.PlantList">
+                            <option value="">-- 請先選擇客戶 --</option>
+                        </select>
+                        <span asp-validation-for="PlantId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                @* 【修正】將「設備機型」欄位移到「出廠序號」之前 *@
                 <div class="mb-3">
-                    <label asp-for="PlantId" class="form-label"></label>
-                    <select asp-for="PlantId" class="form-control" asp-items="Model.PlantList">
-                        <option value="">-- 請選擇廠區 --</option>
-                    </select>
-                    <span asp-validation-for="PlantId" class="text-danger"></span>
+                    <label asp-for="DeviceModel" class="form-label"></label>
+                    <input asp-for="DeviceModel" class="form-control" />
+                    <span asp-validation-for="DeviceModel" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
                     <label asp-for="SerialNumber" class="form-label"></label>
                     <input asp-for="SerialNumber" class="form-control" />
                     <span asp-validation-for="SerialNumber" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="DeviceModel" class="form-label"></label>
-                    <input asp-for="DeviceModel" class="form-control" />
-                    <span asp-validation-for="DeviceModel" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
@@ -67,4 +82,31 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#customerSelect').on('change', function () {
+                var customerId = $(this).val();
+                var plantSelect = $('#plantSelect');
+                plantSelect.empty().append('<option value="">-- 正在載入廠區... --</option>');
+
+                if (!customerId) {
+                    plantSelect.empty().append('<option value="">-- 請先選擇客戶 --</option>');
+                    return;
+                }
+
+                // 【注意】這裡的 URL 指向 DevicesController 的 GetPlantsByCustomer
+                $.getJSON('@Url.Action("GetPlantsByCustomer", "Devices")', { customerId: customerId }, function (plants) {
+                    plantSelect.empty().append('<option value="">-- 請選擇廠區 --</option>');
+                    $.each(plants, function (index, plant) {
+                        plantSelect.append($('<option/>', {
+                            value: plant.plantId,
+                            text: plant.plantName
+                        }));
+                    });
+                });
+            });
+        });
+    </script>
 }
+

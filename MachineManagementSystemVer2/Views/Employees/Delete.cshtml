@@ -1,0 +1,33 @@
+﻿@model MachineManagementSystemVer2.Models.Employee
+
+@{
+    ViewData["Title"] = "刪除員工";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3>您確定要刪除這位員工嗎?</h3>
+<div>
+    <h4>員工: @Model.EmployeeName</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.EmployeeName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.EmployeeName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.EmployeeTitle)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.EmployeeTitle)
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="EmployeeId" />
+        <input type="submit" value="刪除" class="btn btn-danger" /> |
+        <a asp-action="Index">返回列表</a>
+    </form>
+</div>

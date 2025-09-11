@@ -2,37 +2,80 @@
 
 @{
     ViewData["Title"] = "建立維修案件";
+
+    // 【修正】將小時的選項排序調整為從 9-23 點開始，再接續 0-8 點
+    var workHours = Enumerable.Range(9, 15); // 產生 9, 10, ..., 23
+    var nightHours = Enumerable.Range(0, 9);  // 產生 0, 1, ..., 8
+    var allHoursInOrder = workHours.Concat(nightHours); // 將兩個序列合併
+    var hourOptions = allHoursInOrder.Select(h => new SelectListItem { Value = h.ToString(), Text = h.ToString("00") });
+
+    var minuteOptions = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "0", Text = "00" },
+        new SelectListItem { Value = "15", Text = "15" },
+        new SelectListItem { Value = "30", Text = "30" },
+        new SelectListItem { Value = "45", Text = "45" },
+    };
 }
 
 <style>
     .form-container {
-        font-size: 16px;
+        font-size: 1.5rem; /* 從預設的 1rem (16px) 放大 */
     }
-
-        .form-container .form-label {
-            font-weight: 600;
-        }
+    .info-box {
+        background-color: #e9ecef;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        font-weight: 600;
+    }
+    /* --- 【新增】為所有下拉式選單加入向下箭頭圖示 --- */
+    select.form-control {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        padding-right: 2.5rem; /* 確保文字不會蓋到箭頭 */
+    }
 </style>
 
+
+
 <div class="form-container">
-    <h1>@ViewData["Title"]</h1>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>@ViewData["Title"]</h1>
+        <div class="info-box">
+            建單人員：@ViewBag.LoggedInEmployeeName
+        </div>
+    </div>
     <hr />
 
     <div class="row">
         <div class="col-md-10">
-            <form asp-action="Create" method="post">
+            @* 【關鍵】確保所有表單元素都在這一個 form 標籤之內 *@
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                @* 顯示所有驗證錯誤，而不僅僅是模型級別的 *@
+                <div asp-validation-summary="All" class="text-danger"></div>
 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="CustomerId" class="form-label"></label>
+                        <select id="customerSelect" asp-for="CustomerId" class="form-control" asp-items="Model.CustomerList">
+                            <option value="">-- 請選擇客戶 --</option>
+                        </select>
+                        <span asp-validation-for="CustomerId" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
                         <label asp-for="PlantId" class="form-label"></label>
                         <select id="plantSelect" asp-for="PlantId" class="form-control" asp-items="Model.PlantList">
-                            <option value="">-- 請先選擇廠區 --</option>
+                            <option value="">-- 請先選擇客戶 --</option>
                         </select>
                         <span asp-validation-for="PlantId" class="text-danger"></span>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label asp-for="DeviceId" class="form-label"></label>
                         <select id="deviceSelect" asp-for="DeviceId" class="form-control" asp-items="Model.DeviceList">
                             <option value="">-- 請先選擇廠區 --</option>
@@ -41,10 +84,46 @@
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label asp-for="OccurredAt" class="form-label"></label>
-                    <input asp-for="OccurredAt" class="form-control" />
-                    <span asp-validation-for="OccurredAt" class="text-danger"></span>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="OccurredDate" class="form-label"></label>
+                        <div class="input-group">
+                            <input asp-for="OccurredDate" class="form-control" type="date" style="flex: 3 1 0%;" />
+                            <select asp-for="OccurredHour" class="form-control" asp-items="hourOptions" style="flex: 0.5 1 0%;"></select>
+                            <select asp-for="OccurredMinute" class="form-control" asp-items="minuteOptions" style="flex: 0.5 1 0%;"></select>
+                        </div>
+                        <span asp-validation-for="OccurredDate" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="StartDate" class="form-label"></label>
+                        <div class="input-group">
+                            <input asp-for="StartDate" class="form-control" type="date" style="flex: 3 1 0%;" />
+                            <select asp-for="StartHour" class="form-control" asp-items="hourOptions" style="flex: 0.5 1 0%;">
+                                <option value="">--</option>
+                            </select>
+                            <select asp-for="StartMinute" class="form-control" asp-items="minuteOptions" style="flex: 0.5 1 0%;">
+                                <option value="">--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="EndDate" class="form-label"></label>
+                        <div class="input-group">
+                            <input asp-for="EndDate" class="form-control" type="date" style="flex: 3 1 0%;" />
+                            <select asp-for="EndHour" class="form-control" asp-items="hourOptions" style="flex: 0.5 1 0%;">
+                                <option value="">--</option>
+                            </select>
+                            <select asp-for="EndMinute" class="form-control" asp-items="minuteOptions" style="flex: 0.5 1 0%;">
+                                <option value="">--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- 【新增】案件標題輸入框 -->
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label"></label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
                 </div>
 
                 <div class="mb-3">
@@ -65,6 +144,12 @@
                     <span asp-validation-for="CaseRemark" class="text-danger"></span>
                 </div>
 
+                <div class="mb-3">
+                    <label asp-for="Photos" class="form-label"></label>
+                    <input asp-for="Photos" class="form-control" type="file" multiple accept="image/*" />
+                    <div id="photoPreview" class="mt-2 d-flex flex-wrap"></div>
+                </div>
+
                 <div class="d-flex justify-content-start mt-4">
                     <button type="submit" class="btn btn-primary">建立案件</button>
                     <a asp-action="Index" class="btn btn-secondary ms-2">返回列表</a>
@@ -80,75 +165,63 @@
     }
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        // 【偵錯】我們將加入 console.log 來追蹤程式碼的執行流程
         $(document).ready(function () {
-            // 步驟 1: 確認 jQuery 已載入且此區塊已執行
-            console.log("Document is ready. jQuery is loaded.");
-
-            var plantSelect = $('#plantSelect');
-
-            // 步驟 2: 確認是否成功選取到廠區下拉選單
-            if(plantSelect.length) {
-                console.log("Successfully selected the #plantSelect element.");
-            } else {
-                console.error("錯誤：找不到 #plantSelect 這個元素！");
-            }
-
-            // 步驟 3: 綁定 change 事件
-            plantSelect.on('change', function () {
-                // 步驟 4: 確認 change 事件是否被觸發
-                var plantId = $(this).val();
-                console.log("廠區選擇已變更！ 被選中的廠區 ID: " + plantId);
-
+            // --- 三層連動式下拉選單 ---
+            $('#customerSelect').on('change', function () {
+                var customerId = $(this).val();
+                var plantSelect = $('#plantSelect');
                 var deviceSelect = $('#deviceSelect');
-                deviceSelect.empty();
-
-                if (!plantId) {
-                    deviceSelect.append($('<option/>', {
-                        value: '',
-                        text: '-- 請先選擇廠區 --'
-                    }));
+                plantSelect.empty().append('<option value="">-- 正在載入廠區... --</option>');
+                deviceSelect.empty().append('<option value="">-- 請先選擇廠區 --</option>');
+                if (!customerId) {
+                    plantSelect.empty().append('<option value="">-- 請先選擇客戶 --</option>');
                     return;
                 }
-
-                deviceSelect.append($('<option/>', {
-                    value: '',
-                    text: '-- 正在載入設備... --'
-                }));
-
-                // 步驟 5: 確認 AJAX 請求的 URL 是否正確
-                var url = '@Url.Action("GetDevicesByPlant", "RepairCases")';
-                console.log("準備發送 AJAX 請求至 URL: " + url + "?plantId=" + plantId);
-
-                $.getJSON(url, { plantId: plantId }, function (devices) {
-                    // 步驟 6: 確認是否成功接收到後端回傳的資料
-                    console.log("AJAX 請求成功。收到的資料:", devices);
-
-                    deviceSelect.empty();
-                    deviceSelect.append($('<option/>', {
-                        value: '',
-                        text: '-- 請選擇設備 --'
-                    }));
-
-                    $.each(devices, function (index, device) {
-                        deviceSelect.append($('<option/>', {
-                            value: device.deviceId,
-                            text: device.deviceModel
-                        }));
+                $.getJSON('@Url.Action("GetPlantsByCustomer", "RepairCases")', { customerId: customerId }, function (plants) {
+                    plantSelect.empty().append('<option value="">-- 請選擇廠區 --</option>');
+                    $.each(plants, function (index, plant) {
+                        plantSelect.append($('<option/>', { value: plant.plantId, text: plant.plantName }));
                     });
-                }).fail(function(jqXHR, textStatus, errorThrown) {
-                    // 步驟 7: 如果 AJAX 請求失敗，顯示詳細錯誤
-                    console.error("AJAX 請求失敗！");
-                    console.error("狀態: " + textStatus);
-                    console.error("錯誤: " + errorThrown);
-
-                    deviceSelect.empty();
-                     deviceSelect.append($('<option/>', {
-                        value: '',
-                        text: '-- 載入失敗 --'
-                    }));
                 });
+            });
+
+            $('#plantSelect').on('change', function () {
+                var plantId = $(this).val();
+                var deviceSelect = $('#deviceSelect');
+                deviceSelect.empty().append('<option value="">-- 正在載入設備... --</option>');
+                if (!plantId) {
+                    deviceSelect.empty().append('<option value="">-- 請先選擇廠區 --</option>');
+                    return;
+                }
+                $.getJSON('@Url.Action("GetDevicesByPlant", "RepairCases")', { plantId: plantId }, function (devices) {
+                    deviceSelect.empty().append('<option value="">-- 請選擇設備 --</option>');
+                    $.each(devices, function (index, device) {
+                        deviceSelect.append($('<option/>', { value: device.deviceId, text: device.deviceModel }));
+                    });
+                });
+            });
+
+            // --- 圖片預覽功能 ---
+            $('#Photos').on('change', function(event) {
+                var previewContainer = $('#photoPreview');
+                previewContainer.empty();
+                var files = event.target.files;
+                if (files) {
+                    for (var i = 0; i < files.length; i++) {
+                        var file = files[i];
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            var img = $('<img />', {
+                                src: e.target.result,
+                                style: 'width: 150px; height: 150px; object-fit: cover; margin: 5px; border: 1px solid #ddd; border-radius: 4px;'
+                             });
+                            previewContainer.append(img);
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                }
             });
         });
     </script>
 }
+

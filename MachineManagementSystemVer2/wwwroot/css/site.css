@@ -1,4 +1,92 @@
+/* 請將這些樣式規則，加入到您現有的 site.css 檔案的最上方，
+   或是直接用這份檔案的內容，完整地覆蓋掉您舊的檔案。 */
+
+/* --- 全域風格設定 --- */
+
 html {
+    font-size: 16px; /* 設定基礎字體大小 */
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px; /* 預留頁尾空間 */
+    font-size: 1.1rem; /* 【字體放大】將基礎字體放大 */
+}
+
+/* --- 藍色主題 --- */
+
+/* 導覽列 */
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* 主要按鈕 */
+.btn-primary {
+    background-color: #0d6efd; /* Bootstrap 預設藍色 */
+    border-color: #0d6efd;
+}
+
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+    }
+
+/* 次要按鈕 */
+.btn-outline-info {
+    color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+
+    .btn-outline-info:hover {
+        color: #fff;
+        background-color: #0dcaf0;
+        border-color: #0dcaf0;
+    }
+
+
+/* 表格標頭 */
+.table > thead {
+    background-color: #e7f1ff; /* 【藍色系】使用淡藍色作為表格標頭背景 */
+}
+
+/* 狀態徽章 */
+.badge.bg-primary {
+    background-color: #0d6efd !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+.badge.bg-success {
+    background-color: #198754 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+}
+
+/* 卡片標頭 */
+.card-header {
+    background-color: #f8f9fa; /* 維持淺灰色，讓內容更突出 */
+    font-weight: 500;
+}
+
+/* 連結 */
+a {
+    color: #0d6efd;
+}
+
+    a:hover {
+        color: #0a58ca;
+    }
+
+/* --- 其他既有樣式 --- */
+/* (您 site.css 中其他的既有樣式可以保留在下方) */
+
+
+/*html {
   font-size: 14px;
 }
 
@@ -19,4 +107,4 @@ html {
 
 body {
   margin-bottom: 60px;
-}
+}*/

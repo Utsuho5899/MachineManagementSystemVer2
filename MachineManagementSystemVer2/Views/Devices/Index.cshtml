@@ -1,59 +1,88 @@
 ﻿@model IEnumerable<MachineManagementSystemVer2.Models.Device>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "設備總覽";
 }
 
-<h1>Index</h1>
+<h1>@ViewData["Title"]</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-controller="Devices" asp-action="Create" class="btn btn-primary">新增設備</a>
 </p>
-<table class="table">
+
+<!-- 【新增】篩選表單 -->
+<form asp-action="Index" method="get">
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <input type="text" name="searchCustomer" value="@ViewData["CurrentFilterCustomer"]" class="form-control" placeholder="依客戶名稱篩選" />
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="searchPlant" value="@ViewData["CurrentFilterPlant"]" class="form-control" placeholder="依廠區名稱篩選" />
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="searchModel" value="@ViewData["CurrentFilterModel"]" class="form-control" placeholder="依設備機型篩選" />
+        </div>
+        <div class="col-md-3">
+            <input type="submit" value="搜尋" class="btn btn-info" />
+            <a asp-action="Index" class="btn btn-secondary">清除</a>
+        </div>
+    </div>
+</form>
+
+
+<table class="table table-hover">
     <thead>
         <tr>
+            <th>
+                @* 【更新】將標題改為可點擊的排序連結 *@
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["CustomerSortParm"]"
+                   asp-route-searchCustomer="@ViewData["CurrentFilterCustomer"]" asp-route-searchPlant="@ViewData["CurrentFilterPlant"]" asp-route-searchModel="@ViewData["CurrentFilterModel"]">客戶名稱</a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["PlantSortParm"]"
+                   asp-route-searchCustomer="@ViewData["CurrentFilterCustomer"]" asp-route-searchPlant="@ViewData["CurrentFilterPlant"]" asp-route-searchModel="@ViewData["CurrentFilterModel"]">廠區名稱</a>
+            </th>
+            <th>
+                @* 【新增】設備機型欄位，並加入排序功能 *@
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["ModelSortParm"]"
+                   asp-route-searchCustomer="@ViewData["CurrentFilterCustomer"]" asp-route-searchPlant="@ViewData["CurrentFilterPlant"]" asp-route-searchModel="@ViewData["CurrentFilterModel"]">設備機型</a>
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.SerialNumber)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Plant)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.ProductionLine)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DeviceModel)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Remark)
-            </th>
-            <th></th>
+            <th>操作</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.SerialNumber)
-            </td>
-            <td>
-                    @Html.DisplayFor(modelItem => item.Plant)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProductionLine)
-            </td>
-            <td>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Plant.Customer.CustomerName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Plant.PlantName)
+                </td>
+                <td>
+                    @* 【新增】顯示設備機型 *@
                     @Html.DisplayFor(modelItem => item.DeviceModel)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Remark)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.DeviceId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.DeviceId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.DeviceId">Delete</a>
-            </td>
-        </tr>
-}
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SerialNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductionLine)
+                </td>
+                <td>
+                    @* 【修正】移除刪除按鈕，並美化其餘按鈕 *@
+                    <a asp-controller="Devices" asp-action="Details" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-info">詳情</a>
+                    <a asp-controller="Devices" asp-action="Edit" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-secondary">編輯</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+

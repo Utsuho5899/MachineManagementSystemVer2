@@ -3,21 +3,18 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MachineManagementSystemVer2.ViewModels
 {
-    public class DeviceCreateViewModel
+    public class DeviceEditViewModel
     {
-        // --- 新增 ---
-        [Required(ErrorMessage = "請先選擇客戶")]
-        [Display(Name = "所屬客戶")]
-        public int CustomerId { get; set; }
-
-        [Required(ErrorMessage = "請選擇所屬廠區")]
-        [Display(Name = "所屬廠區")]
-        public int PlantId { get; set; }
+        public int DeviceId { get; set; }
 
         [Required(ErrorMessage = "出廠序號為必填")]
         [StringLength(50)]
         [Display(Name = "出廠序號")]
         public string SerialNumber { get; set; }
+
+        [Required(ErrorMessage = "請選擇所屬廠區")]
+        [Display(Name = "所屬廠區")]
+        public int PlantId { get; set; }
 
         [StringLength(15)]
         [Display(Name = "客戶產線代稱 (選填)")]
@@ -32,8 +29,7 @@ namespace MachineManagementSystemVer2.ViewModels
         [Display(Name = "備註 (選填)")]
         public string? Remark { get; set; }
 
-        // --- 用於顯示下拉選單 ---
-        public SelectList? CustomerList { get; set; }
         public SelectList? PlantList { get; set; }
     }
 }
+

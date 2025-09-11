@@ -4,6 +4,7 @@ using MachineManagementSystemVer2.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MachineManagementSystemVer2.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250915012229_RemoveSignatureFieldFromRepairCase")]
+    partial class RemoveSignatureFieldFromRepairCase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -460,11 +463,6 @@ namespace MachineManagementSystemVer2.Migrations
                     b.Property<DateTime?>("StartTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.HasKey("RepairCaseId");
 
                     b.HasIndex("CustomerId");
@@ -486,8 +484,7 @@ namespace MachineManagementSystemVer2.Migrations
                             DeviceId = 1,
                             EmployeeId = 1,
                             OccurredAt = new DateTime(2024, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PlantId = 1,
-                            Title = "光刻機光源模組檢查"
+                            PlantId = 1
                         },
                         new
                         {
@@ -497,8 +494,7 @@ namespace MachineManagementSystemVer2.Migrations
                             DeviceId = 2,
                             EmployeeId = 2,
                             OccurredAt = new DateTime(2024, 9, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PlantId = 2,
-                            Title = "蝕刻腔體真空度異常"
+                            PlantId = 2
                         },
                         new
                         {
@@ -508,8 +504,7 @@ namespace MachineManagementSystemVer2.Migrations
                             DeviceId = 3,
                             EmployeeId = 3,
                             OccurredAt = new DateTime(2024, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PlantId = 3,
-                            Title = "自動測試程式錯誤"
+                            PlantId = 3
                         });
                 });
 

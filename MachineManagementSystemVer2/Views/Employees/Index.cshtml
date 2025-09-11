@@ -45,8 +45,10 @@
                 </td>
                 <td>
                     @* TODO: 之後可以加入編輯/詳情/刪除的連結 *@
-                    <a asp-action="Edit" asp-route-id="@item.EmployeeId">編輯</a> |
-                    <a asp-action="Details" asp-route-id="@item.EmployeeId">詳情</a>
+                    @* 【修正】補上遺失的「刪除」連結 *@
+                    <a asp-controller="Employees" asp-action="Edit" asp-route-id="@item.EmployeeId">編輯</a> |
+                    <a asp-controller="Employees" asp-action="Details" asp-route-id="@item.EmployeeId">詳情</a> |
+                    <a asp-controller="Employees" asp-action="Delete" asp-route-id="@item.EmployeeId">刪除</a>
                 </td>
             </tr>
         }

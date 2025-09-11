@@ -1,0 +1,39 @@
+﻿@model MachineManagementSystemVer2.ViewModels.TimelineEntry
+@using MachineManagementSystemVer2.ViewModels
+
+@{
+    // 【修正】改用 Type 來判斷樣式
+    var entryClass = "";
+    if (Model.Type == TimelineEntry.EntryType.Initial)
+    {
+        entryClass = "timeline-initial-desc";
+    }
+    // 從 ViewData 讀取 IsLast 旗標
+    var isLast = ViewData["IsLast"] as bool? ?? false;
+    if (isLast && Model.Type != TimelineEntry.EntryType.Initial)
+    {
+        entryClass = "timeline-latest-desc";
+    }
+}
+
+<div class="timeline-entry @entryClass" data-timestamp="@Model.Timestamp.Ticks">
+    @if (Model.Type == TimelineEntry.EntryType.StatusChange)
+    {
+        <div class="fst-italic text-muted">
+            狀態從 <span class="badge bg-secondary">@Model.OldStatus</span> 變更為 <span class="badge bg-primary">@Model.NewStatus</span>
+        </div>
+    }
+    else
+    {
+        <p class="mb-0">
+            @if (Model.Type == TimelineEntry.EntryType.Initial)
+            {
+                <strong>[初始故障描述]</strong>
+            }
+            @Model.Content
+        </p>
+    }
+    <div class="timeline-entry-footer">
+        @Model.Author 於 @Model.Timestamp.ToString("yyyy-MM-dd HH:mm")
+    </div>
+</div>
