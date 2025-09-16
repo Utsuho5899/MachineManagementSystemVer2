@@ -8,9 +8,10 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace MachineManagementSystemVer2.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Engineer,Manager,Admin")]
     public class DevicesController : Controller
     {
+
         private readonly AppDbContext _context;
 
         public DevicesController(AppDbContext context)
@@ -193,67 +194,6 @@ namespace MachineManagementSystemVer2.Controllers
             viewModel.PlantList = new SelectList(await _context.Plants.ToListAsync(), "PlantId", "PlantName", viewModel.PlantId);
             return View(viewModel);
         }
-        // GET: Devices/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var device = await _context.Devices.FindAsync(id);
-            if (device == null) return NotFound();
-
-            var viewModel = new DeviceEditViewModel
-            {
-                DeviceId = device.DeviceId,
-                SerialNumber = device.SerialNumber,
-                PlantId = device.PlantId,
-                ProductionLine = device.ProductionLine,
-                DeviceModel = device.DeviceModel,
-                Remark = device.Remark,
-                PlantList = new SelectList(await _context.Plants.ToListAsync(), "PlantId", "PlantName", device.PlantId)
-            };
-
-            return View(viewModel);
-        }
-
-        // POST: Devices/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, DeviceEditViewModel viewModel)
-        {
-            if (id != viewModel.DeviceId) return NotFound();
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    var device = await _context.Devices.FindAsync(id);
-                    if (device == null) return NotFound();
-
-                    device.SerialNumber = viewModel.SerialNumber;
-                    device.PlantId = viewModel.PlantId;
-                    device.ProductionLine = viewModel.ProductionLine;
-                    device.DeviceModel = viewModel.DeviceModel;
-                    device.Remark = viewModel.Remark;
-
-                    _context.Update(device);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!DeviceExists(viewModel.DeviceId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            viewModel.PlantList = new SelectList(await _context.Plants.ToListAsync(), "PlantId", "PlantName", viewModel.PlantId);
-            return View(viewModel);
-        }
 
         // GET: Devices/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -270,6 +210,7 @@ namespace MachineManagementSystemVer2.Controllers
         }
 
         // POST: Devices/Delete/5
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

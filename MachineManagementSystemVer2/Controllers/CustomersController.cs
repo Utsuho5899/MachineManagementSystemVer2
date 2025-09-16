@@ -1,6 +1,7 @@
 ﻿using MachineManagementSystemVer2.Data;
 using MachineManagementSystemVer2.Models;
 using MachineManagementSystemVer2.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ namespace MachineManagementSystemVer2.Controllers
 {
     namespace MachineManagementSystemVer2.Controllers
     {
+        [Authorize(Roles = "Engineer,Manager,Admin")]
         public class CustomersController : Controller
         {
             private readonly AppDbContext _context;
@@ -35,7 +37,7 @@ namespace MachineManagementSystemVer2.Controllers
                 if (id == null) return NotFound();
 
                 var customer = await _context.Customers
-                    .Include(c => c.Plants) // 載入此客戶旗下的所有廠區
+                    .Include(c => c.Plants) 
                     .FirstOrDefaultAsync(m => m.CustomerId == id);
 
                 if (customer == null) return NotFound();
@@ -83,14 +85,6 @@ namespace MachineManagementSystemVer2.Controllers
                     .FirstOrDefaultAsync(c => c.CustomerId == id);
                 if (customer == null) return NotFound();
 
-                //var viewModel = new CustomerEditViewModel
-                //{
-                //    CustomerId = customer.CustomerId,
-                //    CustomerName = customer.CustomerName,
-                //    CustomerTaxId = customer.CustomerTaxId,
-                //    CustomerAddress = customer.CustomerAddress,
-                //    CustomerPhone = customer.CustomerPhone
-                //};
                 return View(customer);
             }
 

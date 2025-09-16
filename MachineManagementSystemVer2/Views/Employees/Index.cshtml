@@ -18,6 +18,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.EmployeeTitle)
             </th>
+            <th>狀態</th> @* 新增狀態欄位 *@
             <th>
                 @Html.DisplayNameFor(model => model.EmployeePhone)
             </th>
@@ -38,6 +39,16 @@
                     @Html.DisplayFor(modelItem => item.EmployeeTitle)
                 </td>
                 <td>
+                    @* 根據狀態顯示不同顏色的徽章 *@
+                    @if (item.Status == "在職")
+                    {
+                        <span class="badge bg-success">@item.Status</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">@item.Status</span>
+                    }
+                <td>
                     @Html.DisplayFor(modelItem => item.EmployeePhone)
                 </td>
                 <td>
@@ -47,8 +58,12 @@
                     @* TODO: 之後可以加入編輯/詳情/刪除的連結 *@
                     @* 【修正】補上遺失的「刪除」連結 *@
                     <a asp-controller="Employees" asp-action="Edit" asp-route-id="@item.EmployeeId">編輯</a> |
-                    <a asp-controller="Employees" asp-action="Details" asp-route-id="@item.EmployeeId">詳情</a> |
-                    <a asp-controller="Employees" asp-action="Delete" asp-route-id="@item.EmployeeId">刪除</a>
+                    <a asp-controller="Employees" asp-action="Details" asp-route-id="@item.EmployeeId">詳情</a> | 
+                    @* 【權限控制】只有 Admin 看得到刪除按鈕 *@
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Employees" asp-action="Delete" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-outline-danger">刪除</a>
+                    }
                 </td>
             </tr>
         }

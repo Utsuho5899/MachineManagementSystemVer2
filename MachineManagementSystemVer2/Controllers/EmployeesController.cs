@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace MachineManagementSystemVer2.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "HR,Admin")]
     public class EmployeesController : Controller
     {
         private readonly AppDbContext _context;
@@ -22,7 +22,6 @@ namespace MachineManagementSystemVer2.Controllers
             _context = context;
         }
 
-        // 【新增】補上 Index 方法
         // GET: Employees
         public async Task<IActionResult> Index()
         {
@@ -82,6 +81,8 @@ namespace MachineManagementSystemVer2.Controllers
                 EmployeeName = employee.EmployeeName,
                 HireDate = employee.HireDate,
                 EmployeeTitle = employee.EmployeeTitle,
+                Role = employee.Role,
+                Status = employee.Status,
                 EmployeeAddress = employee.EmployeeAddress,
                 EmployeePhone = employee.EmployeePhone,
                 EmergencyContact = employee.EmergencyContact,
@@ -99,29 +100,40 @@ namespace MachineManagementSystemVer2.Controllers
         {
             if (id != viewModel.EmployeeId) return NotFound();
 
+            // 先從資料庫讀取原始員工資料，用於權限檢查和後續更新
+            var employeeToUpdate = await _context.Employees.FindAsync(id);
+            if (employeeToUpdate == null) return NotFound();
+
+            // 【原則 2】後端安全檢查：如果目前登入者不是 Admin 或 HR，
+            // 就算前端的表單被惡意修改並送出了 Status 資料，我們也強制將它設回原本的狀態。
+            if (!User.IsInRole("Admin") && !User.IsInRole("HR"))
+            {
+                viewModel.Status = employeeToUpdate.Status;
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var employee = await _context.Employees.FindAsync(id);
-                    if (employee == null) return NotFound();
-
-                    employee.EmployeeName = viewModel.EmployeeName;
-                    employee.HireDate = viewModel.HireDate;
-                    employee.EmployeeTitle = viewModel.EmployeeTitle;
-                    employee.EmployeeAddress = viewModel.EmployeeAddress;
-                    employee.EmployeePhone = viewModel.EmployeePhone;
-                    employee.EmergencyContact = viewModel.EmergencyContact;
-                    employee.EmergencyPhone = viewModel.EmergencyPhone;
-                    employee.Account = viewModel.Account;
-                    employee.Remarks = viewModel.Remarks;
+                    // 更新欄位
+                    employeeToUpdate.EmployeeName = viewModel.EmployeeName;
+                    employeeToUpdate.HireDate = viewModel.HireDate;
+                    employeeToUpdate.EmployeeTitle = viewModel.EmployeeTitle;
+                    employeeToUpdate.EmployeeAddress = viewModel.EmployeeAddress;
+                    employeeToUpdate.EmployeePhone = viewModel.EmployeePhone;
+                    employeeToUpdate.EmergencyContact = viewModel.EmergencyContact;
+                    employeeToUpdate.EmergencyPhone = viewModel.EmergencyPhone;
+                    employeeToUpdate.Account = viewModel.Account;
+                    employeeToUpdate.Remarks = viewModel.Remarks;
+                    employeeToUpdate.Role = viewModel.Role;
+                    employeeToUpdate.Status = viewModel.Status;
 
                     if (!string.IsNullOrEmpty(viewModel.NewPassword))
                     {
-                        employee.Password = viewModel.NewPassword;
+                        employeeToUpdate.Password = viewModel.NewPassword;
                     }
 
-                    _context.Update(employee);
+                    _context.Update(employeeToUpdate);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -134,7 +146,11 @@ namespace MachineManagementSystemVer2.Controllers
             return View(viewModel);
         }
 
+       
+
         // GET: Employees/Delete/5
+
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -144,6 +160,7 @@ namespace MachineManagementSystemVer2.Controllers
         }
 
         // POST: Employees/Delete/5
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "新增員工資料";
+    // 準備角色下拉選單的選項
+    var roleOptions = new SelectList(new List<string> { "Engineer", "Manager", "HR", "Admin" });
 }
 
 <style>
@@ -41,6 +43,12 @@
                     <label asp-for="EmployeeTitle" class="form-label"></label>
                     <input asp-for="EmployeeTitle" class="form-control" />
                     <span asp-validation-for="EmployeeTitle" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Role" class="control-label"></label>
+                    <select asp-for="Role" class="form-control" asp-items="roleOptions"></select>
+                    <span asp-validation-for="Role" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">

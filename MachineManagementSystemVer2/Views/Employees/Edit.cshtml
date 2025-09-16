@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "編輯員工資料";
+    var roleOptions = new SelectList(new List<string> { "Engineer", "Manager", "HR", "Admin" });
+    var statusOptions = new SelectList(new List<string> { "在職", "離職" });
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -32,6 +34,12 @@
             </div>
 
             <div class="mb-3">
+                <label asp-for="Role" class="control-label"></label>
+                <select asp-for="Role" class="form-control" asp-items="roleOptions"></select>
+                <span asp-validation-for="Role" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
                 <label asp-for="EmployeeAddress" class="control-label"></label>
                 <input asp-for="EmployeeAddress" class="form-control" />
                 <span asp-validation-for="EmployeeAddress" class="text-danger"></span>
@@ -56,9 +64,29 @@
                 </div>
             </div>
 
+           
+            <h5 class="mt-4">系統權限資訊</h5>
+            <hr />
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Role" class="control-label"></label>
+                    <select asp-for="Role" class="form-control" asp-items="roleOptions"></select>
+                    <span asp-validation-for="Role" class="text-danger"></span>
+                </div>
+
+                @* 【原則 2】前端介面控制：只有 Admin 或 HR 才能看到並修改「狀態」這個欄位 *@
+                @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+                {
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Status" class="control-label"></label>
+                        <select asp-for="Status" class="form-control" asp-items="statusOptions"></select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+                }
+            </div>
+
             <h5 class="mt-4">系統登入資訊</h5>
             <hr />
-
             <div class="mb-3">
                 <label asp-for="Account" class="control-label"></label>
                 <input asp-for="Account" class="form-control" />

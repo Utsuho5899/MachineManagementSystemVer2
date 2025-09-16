@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MachineManagementSystemVer2.Data;
+﻿using MachineManagementSystemVer2.Data;
 using MachineManagementSystemVer2.Models;
 using MachineManagementSystemVer2.ViewModels; // 引用 ViewModel 命名空間
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace MachineManagementSystemVer2.Controllers
 {
+    [Authorize(Roles = "Engineer,Manager,Admin")]
     public class PlantsController : Controller
     {
         private readonly AppDbContext _context;
@@ -33,7 +35,7 @@ namespace MachineManagementSystemVer2.Controllers
             var viewModel = new PlantCreateViewModel
             {
                 CustomerId = customerId,
-                CustomerName = customer.CustomerName // 將客戶名稱傳給 View 以供顯示
+                CustomerName = customer.CustomerName 
             };
 
             return View(viewModel);
@@ -44,17 +46,16 @@ namespace MachineManagementSystemVer2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PlantCreateViewModel viewModel)
         {
-            // 現在，控制器接收的是乾淨的 ViewModel
+            
             if (ModelState.IsValid)
             {
-                // 手動將 ViewModel 的資料轉換(映射)到真正的資料庫模型 Plant
                 var plant = new Plant
                 {
                     PlantName = viewModel.PlantName,
                     PlantCode = viewModel.PlantCode,
                     PlantAddress = viewModel.PlantAddress,
                     PlantPhone = viewModel.PlantPhone,
-                    CustomerId = viewModel.CustomerId // 關鍵：確保 CustomerId 被正確賦值
+                    CustomerId = viewModel.CustomerId 
                 };
 
                 _context.Add(plant);

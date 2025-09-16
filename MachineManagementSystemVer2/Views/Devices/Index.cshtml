@@ -80,6 +80,11 @@
                     @* 【修正】移除刪除按鈕，並美化其餘按鈕 *@
                     <a asp-controller="Devices" asp-action="Details" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-info">詳情</a>
                     <a asp-controller="Devices" asp-action="Edit" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-secondary">編輯</a>
+                    @* 【權限控制】只有 Admin 看得到刪除按鈕 *@
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Devices" asp-action="Delete" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-danger">刪除</a>
+                    }
                 </td>
             </tr>
         }

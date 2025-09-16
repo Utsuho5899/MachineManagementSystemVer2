@@ -99,63 +99,43 @@ namespace MachineManagementSystemVer2.Data
                     PlantId = 3,
                 }
             );
-
-            // Employee 人員
+            // --- 種子資料 (Seed Data) ---
             modelBuilder.Entity<Employee>().HasData(
+                new Employee { EmployeeId = 1, EmployeeName = "王小明", HireDate = new DateTime(2022, 1, 1), EmployeeTitle = "現場工程師", EmployeeAddress = "屏東市xxxxxxxxx", EmployeePhone = "0912345678", EmergencyContact = "王媽媽", EmergencyPhone = "0987654321", Status = "在職", Role = "Engineer", Account = "user1", Password = "password" },
+                new Employee { EmployeeId = 2, EmployeeName = "李主管", HireDate = new DateTime(2012, 1, 1), EmployeeTitle = "業務經理", EmployeeAddress = "新竹市xxxxxx", EmployeePhone = "0952368741", EmergencyContact = "李妻", EmergencyPhone = "03-1234567", Status = "在職", Role = "Manager", Account = "manager1", Password = "password" },
+                new Employee { EmployeeId = 3, EmployeeName = "陳大華", HireDate = new DateTime(2022, 6, 1), EmployeeTitle = "現場工程師", EmployeeAddress = "高雄市xxxxxxxxx", EmployeePhone = "0919874585", EmergencyContact = "陳媽媽", EmergencyPhone = "0987654321", Status = "在職", Role = "Engineer", Account = "user2", Password = "password" },
+                new Employee { EmployeeId = 4, EmployeeName = "張經理", HireDate = new DateTime(2020, 9, 8), EmployeeTitle = "工程部經理", EmployeeAddress = "苗栗市xxxxxxxxx", EmployeePhone = "0987258678", EmergencyContact = "張嬸", EmergencyPhone = "0987612587", Status = "在職", Role = "Manager", Account = "manager2", Password = "password" },
+                new Employee { EmployeeId = 5, EmployeeName = "系統管理員", HireDate = new DateTime(2025, 9, 5), EmployeeTitle = "系統管理員", EmployeeAddress = "高雄市xxxxxxxxx", EmployeePhone = "0987888888", EmergencyContact = "工程師", EmergencyPhone = "0987612587", Status = "在職", Role = "Admin", Account = "admin", Password = "password" },
+                // 【新增】將資料庫中已存在的 ID=6 的員工加入到種子資料中
                 new Employee
                 {
-                    EmployeeId = 1,
-                    EmployeeName = "王小明",
-                    HireDate = new DateTime(2022, 01, 01),
-                    EmployeeTitle = "現場工程師",
-                    EmployeeAddress = "屏東市xxxxxxxxx",
-                    EmployeePhone = "0912345678",
-                    EmergencyContact = "王媽媽",
-                    EmergencyPhone = "0987654321",
-                },
-                new Employee
-                {
-                    EmployeeId = 2,
-                    EmployeeName = "李主管",
-                    HireDate = new DateTime(2012, 01, 01),
-                    EmployeeTitle = "業務經理",
-                    EmployeeAddress = "新竹市xxxxxx",
-                    EmployeePhone = "0952368741",
-                    EmergencyContact = "李妻",
-                    EmergencyPhone = "03-1234567",
-                },
-                new Employee
-                {
-                    EmployeeId = 3,
-                    EmployeeName = "陳大華",
-                    HireDate = new DateTime(2022, 06, 01),
-                    EmployeeTitle = "現場工程師",
-                    EmployeeAddress = "高雄市xxxxxxxxx",
-                    EmployeePhone = "0919874585",
-                    EmergencyContact = "陳媽媽",
-                    EmergencyPhone = "0987654321",
-                },
-                new Employee
-                {
-                    EmployeeId = 4,
-                    EmployeeName = "張經理",
-                    HireDate = new DateTime(2020, 09, 08),
-                    EmployeeTitle = "工程部經理",
-                    EmployeeAddress = "苗栗市xxxxxxxxx",
-                    EmployeePhone = "0987258678",
-                    EmergencyContact = "張嬸",
-                    EmergencyPhone = "0987612587",
-                },
-                new Employee
-                {
-                    EmployeeId = 5,
-                    EmployeeName = "系統管理員",
-                    HireDate = new DateTime(2025, 09, 05),
+                    EmployeeId = 6,
+                    EmployeeName = "LJB",
+                    Role = "Admin",
+                    Status = "在職",
+                    HireDate = new DateTime(2025, 09, 12),
                     EmployeeTitle = "系統管理員",
-                    EmployeeAddress = "高雄市xxxxxxxxx",
-                    EmployeePhone = "0987888888",
-                    EmergencyContact = "工程師",
-                    EmergencyPhone = "0987612587",
+                    EmployeeAddress = "高雄市",
+                    EmployeePhone = "0911111111",
+                    EmergencyContact = "母",
+                    EmergencyPhone = "0933333333",
+                    Account = "abc",
+                    Password = "123456"
+                },
+                new Employee
+                {
+                    EmployeeId = 7,
+                    EmployeeName = "林人資",
+                    Role = "HR",
+                    Status = "在職",
+                    HireDate = new DateTime(2022, 09, 05),
+                    EmployeeTitle = "人資",
+                    EmployeeAddress = "高雄市oooooooo",
+                    EmployeePhone = "0912365852",
+                    EmergencyContact = "人資測試",
+                    EmergencyPhone = "0925856324",
+                    Account = "hr_user",
+                    Password = "password"
                 }
             );
 
@@ -235,15 +215,12 @@ namespace MachineManagementSystemVer2.Data
                 .HasForeignKey(d => d.PlantId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 規則 B: 刪除設備時，連帶刪除其下的所有維修案件 (Cascade)
             modelBuilder.Entity<RepairCase>()
                .HasOne(rc => rc.Device)
                .WithMany(d => d.RepairCases)
                .HasForeignKey(rc => rc.DeviceId)
                .OnDelete(DeleteBehavior.Cascade);
 
-            // 【關鍵】規則 C: 維修案件與廠區的直接關聯，不進行任何串聯動作 (NoAction)
-            // 這就打破了 "廠區 -> 案件" 的第二條路徑，解決了循環問題。
             modelBuilder.Entity<RepairCase>()
                 .HasOne(rc => rc.Plant)
                 .WithMany(p => p.RepairCases)

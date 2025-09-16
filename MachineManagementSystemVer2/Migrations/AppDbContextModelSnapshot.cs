@@ -285,6 +285,16 @@ namespace MachineManagementSystemVer2.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
                     b.HasKey("EmployeeId");
 
                     b.ToTable("Employees");
@@ -293,57 +303,107 @@ namespace MachineManagementSystemVer2.Migrations
                         new
                         {
                             EmployeeId = 1,
+                            Account = "user1",
                             EmergencyContact = "王媽媽",
                             EmergencyPhone = "0987654321",
                             EmployeeAddress = "屏東市xxxxxxxxx",
                             EmployeeName = "王小明",
                             EmployeePhone = "0912345678",
                             EmployeeTitle = "現場工程師",
-                            HireDate = new DateTime(2022, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            HireDate = new DateTime(2022, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Password = "password",
+                            Role = "Engineer",
+                            Status = "在職"
                         },
                         new
                         {
                             EmployeeId = 2,
+                            Account = "manager1",
                             EmergencyContact = "李妻",
                             EmergencyPhone = "03-1234567",
                             EmployeeAddress = "新竹市xxxxxx",
                             EmployeeName = "李主管",
                             EmployeePhone = "0952368741",
                             EmployeeTitle = "業務經理",
-                            HireDate = new DateTime(2012, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            HireDate = new DateTime(2012, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Password = "password",
+                            Role = "Manager",
+                            Status = "在職"
                         },
                         new
                         {
                             EmployeeId = 3,
+                            Account = "user2",
                             EmergencyContact = "陳媽媽",
                             EmergencyPhone = "0987654321",
                             EmployeeAddress = "高雄市xxxxxxxxx",
                             EmployeeName = "陳大華",
                             EmployeePhone = "0919874585",
                             EmployeeTitle = "現場工程師",
-                            HireDate = new DateTime(2022, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            HireDate = new DateTime(2022, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Password = "password",
+                            Role = "Engineer",
+                            Status = "在職"
                         },
                         new
                         {
                             EmployeeId = 4,
+                            Account = "manager2",
                             EmergencyContact = "張嬸",
                             EmergencyPhone = "0987612587",
                             EmployeeAddress = "苗栗市xxxxxxxxx",
                             EmployeeName = "張經理",
                             EmployeePhone = "0987258678",
                             EmployeeTitle = "工程部經理",
-                            HireDate = new DateTime(2020, 9, 8, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            HireDate = new DateTime(2020, 9, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Password = "password",
+                            Role = "Manager",
+                            Status = "在職"
                         },
                         new
                         {
                             EmployeeId = 5,
+                            Account = "admin",
                             EmergencyContact = "工程師",
                             EmergencyPhone = "0987612587",
                             EmployeeAddress = "高雄市xxxxxxxxx",
                             EmployeeName = "系統管理員",
                             EmployeePhone = "0987888888",
                             EmployeeTitle = "系統管理員",
-                            HireDate = new DateTime(2025, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            HireDate = new DateTime(2025, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Password = "password",
+                            Role = "Admin",
+                            Status = "在職"
+                        },
+                        new
+                        {
+                            EmployeeId = 6,
+                            Account = "abc",
+                            EmergencyContact = "母",
+                            EmergencyPhone = "0933333333",
+                            EmployeeAddress = "高雄市",
+                            EmployeeName = "LJB",
+                            EmployeePhone = "0911111111",
+                            EmployeeTitle = "系統管理員",
+                            HireDate = new DateTime(2025, 9, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Password = "123456",
+                            Role = "Admin",
+                            Status = "在職"
+                        },
+                        new
+                        {
+                            EmployeeId = 7,
+                            Account = "hr_user",
+                            EmergencyContact = "人資測試",
+                            EmergencyPhone = "0925856324",
+                            EmployeeAddress = "高雄市oooooooo",
+                            EmployeeName = "林人資",
+                            EmployeePhone = "0912365852",
+                            EmployeeTitle = "人資",
+                            HireDate = new DateTime(2022, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Password = "password",
+                            Role = "HR",
+                            Status = "在職"
                         });
                 });
 

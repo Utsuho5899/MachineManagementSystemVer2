@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MachineManagementSystemVer2.Migrations
 {
     /// <inheritdoc />
-    public partial class FinalModelSync : Migration
+    public partial class InitialCreateWithCompleteSeedData : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -36,6 +36,8 @@ namespace MachineManagementSystemVer2.Migrations
                     EmployeeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EmployeeName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     HireDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EmployeeTitle = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     EmployeeAddress = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
@@ -103,8 +105,11 @@ namespace MachineManagementSystemVer2.Migrations
                 {
                     RepairCaseId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     CaseStatus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     OccurredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     PlantId = table.Column<int>(type: "int", nullable: false),
                     DeviceId = table.Column<int>(type: "int", nullable: false),
                     EmployeeId = table.Column<int>(type: "int", nullable: false),
@@ -230,14 +235,16 @@ namespace MachineManagementSystemVer2.Migrations
 
             migrationBuilder.InsertData(
                 table: "Employees",
-                columns: new[] { "EmployeeId", "Account", "EmergencyContact", "EmergencyPhone", "EmployeeAddress", "EmployeeName", "EmployeePhone", "EmployeeTitle", "HireDate", "Password", "Remarks" },
+                columns: new[] { "EmployeeId", "Account", "EmergencyContact", "EmergencyPhone", "EmployeeAddress", "EmployeeName", "EmployeePhone", "EmployeeTitle", "HireDate", "Password", "Remarks", "Role", "Status" },
                 values: new object[,]
                 {
-                    { 1, null, "王媽媽", "0987654321", "屏東市xxxxxxxxx", "王小明", "0912345678", "現場工程師", new DateTime(2022, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
-                    { 2, null, "李妻", "03-1234567", "新竹市xxxxxx", "李主管", "0952368741", "業務經理", new DateTime(2012, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
-                    { 3, null, "陳媽媽", "0987654321", "高雄市xxxxxxxxx", "陳大華", "0919874585", "現場工程師", new DateTime(2022, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
-                    { 4, null, "張嬸", "0987612587", "苗栗市xxxxxxxxx", "張經理", "0987258678", "工程部經理", new DateTime(2020, 9, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
-                    { 5, null, "工程師", "0987612587", "高雄市xxxxxxxxx", "系統管理員", "0987888888", "系統管理員", new DateTime(2025, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null }
+                    { 1, "user1", "王媽媽", "0987654321", "屏東市xxxxxxxxx", "王小明", "0912345678", "現場工程師", new DateTime(2022, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "password", null, "Engineer", "在職" },
+                    { 2, "manager1", "李妻", "03-1234567", "新竹市xxxxxx", "李主管", "0952368741", "業務經理", new DateTime(2012, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "password", null, "Manager", "在職" },
+                    { 3, "user2", "陳媽媽", "0987654321", "高雄市xxxxxxxxx", "陳大華", "0919874585", "現場工程師", new DateTime(2022, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "password", null, "Engineer", "在職" },
+                    { 4, "manager2", "張嬸", "0987612587", "苗栗市xxxxxxxxx", "張經理", "0987258678", "工程部經理", new DateTime(2020, 9, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), "password", null, "Manager", "在職" },
+                    { 5, "admin", "工程師", "0987612587", "高雄市xxxxxxxxx", "系統管理員", "0987888888", "系統管理員", new DateTime(2025, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), "password", null, "Admin", "在職" },
+                    { 6, "abc", "母", "0933333333", "高雄市", "LJB", "0911111111", "系統管理員", new DateTime(2025, 9, 12, 0, 0, 0, 0, DateTimeKind.Unspecified), "123456", null, "Admin", "在職" },
+                    { 7, "hr_user", "人資測試", "0925856324", "高雄市oooooooo", "林人資", "0912365852", "人資", new DateTime(2022, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), "password", null, "HR", "在職" }
                 });
 
             migrationBuilder.InsertData(
@@ -262,12 +269,12 @@ namespace MachineManagementSystemVer2.Migrations
 
             migrationBuilder.InsertData(
                 table: "RepairCases",
-                columns: new[] { "RepairCaseId", "CaseRemark", "CaseStatus", "CustomerContact", "CustomerId", "Description", "DeviceId", "EmployeeId", "OccurredAt", "PlantId" },
+                columns: new[] { "RepairCaseId", "CaseRemark", "CaseStatus", "CustomerContact", "CustomerId", "Description", "DeviceId", "EmployeeId", "EndTime", "OccurredAt", "PlantId", "StartTime", "Title" },
                 values: new object[,]
                 {
-                    { 1, null, "OPEN", null, null, "客戶反應光刻機曝光後晶圓良率降低，需要檢查光源模組", 1, 1, new DateTime(2024, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1 },
-                    { 2, null, "暫置", null, null, "蝕刻腔體真空無法維持，懷疑是真空幫浦老化", 2, 2, new DateTime(2024, 9, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 2 },
-                    { 3, null, "CLOSE", null, null, "自動測試程式頻繁跳出錯誤代碼，需要檢查控制模組", 3, 3, new DateTime(2024, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), 3 }
+                    { 1, null, "OPEN", null, null, "客戶反應光刻機曝光後晶圓良率降低，需要檢查光源模組", 1, 1, null, new DateTime(2024, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, null, "光刻機光源模組檢查" },
+                    { 2, null, "暫置", null, null, "蝕刻腔體真空無法維持，懷疑是真空幫浦老化", 2, 2, null, new DateTime(2024, 9, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, null, "蝕刻腔體真空度異常" },
+                    { 3, null, "CLOSE", null, null, "自動測試程式頻繁跳出錯誤代碼，需要檢查控制模組", 3, 3, null, new DateTime(2024, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, null, "自動測試程式錯誤" }
                 });
 
             migrationBuilder.CreateIndex(

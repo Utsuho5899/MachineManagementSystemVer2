@@ -22,6 +22,14 @@ namespace MachineManagementSystemVer2.ViewModels
         [Display(Name = "職稱")]
         public string EmployeeTitle { get; set; }
 
+        [Required(ErrorMessage = "必須指定角色")]
+        [Display(Name = "身分組")]
+        public string Role { get; set; }
+
+        [Required]
+        [Display(Name = "狀態")]
+        public string Status { get; set; }
+
         [Required(ErrorMessage = "地址為必填")]
         [StringLength(100)]
         [Display(Name = "地址")]

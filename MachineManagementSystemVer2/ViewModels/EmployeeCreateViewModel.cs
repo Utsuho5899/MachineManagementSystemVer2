@@ -15,6 +15,14 @@ namespace MachineManagementSystemVer2.ViewModels
         [Display(Name = "入職日")]
         public DateTime HireDate { get; set; } = DateTime.Today;
 
+        [Required(ErrorMessage = "必須指定角色")]
+        [Display(Name = "身分組")]
+        public string Role { get; set; }
+
+        [Required]
+        [Display(Name = "狀態")]
+        public string Status { get; set; }
+
         [Required(ErrorMessage = "職稱為必填")]
         [StringLength(30)]
         [Display(Name = "職稱")]
@@ -38,6 +46,8 @@ namespace MachineManagementSystemVer2.ViewModels
         [StringLength(15)]
         [Display(Name = "緊急聯絡人電話")]
         public string EmergencyPhone { get; set; }
+
+        
 
         [StringLength(50)]
         [Display(Name = "系統帳號")]

@@ -13,6 +13,16 @@ namespace MachineManagementSystemVer2.Models
         [Display(Name = "姓名")]
         public string EmployeeName { get; set; }
 
+        // --- 【新增】角色欄位 ---
+        [Required(ErrorMessage = "必須指定角色")]
+        [StringLength(50)]
+        public string Role { get; set; }
+        // --- 【新增】員工狀態 ---
+        [Required]
+        [StringLength(10)]
+        [Display(Name = "狀態")]
+        public string Status { get; set; } = "在職"; // 預設為 "在職"
+
         [Required(ErrorMessage = "入職日為必填")]
         [DataType(DataType.Date)]
         [Display(Name = "入職日")]
@@ -46,7 +56,6 @@ namespace MachineManagementSystemVer2.Models
         [Display(Name = "系統帳號")]
         public string? Account { get; set; }
 
-        // 實際應用中，密碼應進行雜湊(Hashing)處理後再存入資料庫
         [StringLength(200)]
         [Display(Name = "系統密碼")]
         public string? Password { get; set; }
@@ -55,8 +64,6 @@ namespace MachineManagementSystemVer2.Models
         [Display(Name = "備註")]
         public string? Remarks { get; set; }
 
-        // --- 【解決方案】補上這個遺失的導覽屬性 ---
-        // 這代表一個員工可以建立多個維修案件
         public ICollection<RepairCase> RepairCases { get; set; } = new List<RepairCase>();
 
     }
