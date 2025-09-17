@@ -74,10 +74,6 @@ namespace MachineManagementSystemVer2.ViewModels
         [Display(Name = "上傳照片 (可選多張)")]
         public List<IFormFile>? Photos { get; set; }
 
-        // --- 【新增】用於顯示建單人員 ---
-        //public string LoggedInEmployeeName { get; set; }
-
-        // --- 用於顯示下拉選單的資料來源 ---
         public SelectList? PlantList { get; set; }
         public SelectList? CustomerList { get; set; } 
         public SelectList? DeviceList { get; set; }

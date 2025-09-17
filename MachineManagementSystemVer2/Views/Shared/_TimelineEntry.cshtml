@@ -9,11 +9,11 @@
         entryClass = "timeline-initial-desc";
     }
     // 從 ViewData 讀取 IsLast 旗標
-    var isLast = ViewData["IsLast"] as bool? ?? false;
-    if (isLast && Model.Type != TimelineEntry.EntryType.Initial)
-    {
-        entryClass = "timeline-latest-desc";
-    }
+    // var isLast = ViewData["IsLast"] as bool? ?? false;
+    // if (isLast && Model.Type != TimelineEntry.EntryType.Initial)
+    // {
+    //     entryClass = "timeline-latest-desc";
+    // }
 }
 
 <div class="timeline-entry @entryClass" data-timestamp="@Model.Timestamp.Ticks">
@@ -26,10 +26,10 @@
     else
     {
         <p class="mb-0">
-            @if (Model.Type == TimelineEntry.EntryType.Initial)
+            @* @if (Model.Type == TimelineEntry.EntryType.Initial)
             {
                 <strong>[初始故障描述]</strong>
-            }
+            } *@
             @Model.Content
         </p>
     }

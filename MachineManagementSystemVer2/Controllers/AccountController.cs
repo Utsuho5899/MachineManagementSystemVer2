@@ -80,14 +80,6 @@ namespace MachineManagementSystemVer2.Controllers
             return View(model);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
-        {
-            // 登出，清除 Cookie
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login", "Account");
-        }
         // --- 【新增】修改密碼功能 ---
 
         [Authorize] // 只有登入的使用者才能存取

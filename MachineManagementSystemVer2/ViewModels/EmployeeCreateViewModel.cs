@@ -19,9 +19,11 @@ namespace MachineManagementSystemVer2.ViewModels
         [Display(Name = "身分組")]
         public string Role { get; set; }
 
-        [Required]
+        // --- 【新增】補上 Status 欄位 ---
+        [Required(ErrorMessage = "必須指定狀態")]
         [Display(Name = "狀態")]
         public string Status { get; set; }
+
 
         [Required(ErrorMessage = "職稱為必填")]
         [StringLength(30)]

@@ -2,8 +2,9 @@
 
 @{
     ViewData["Title"] = "新增員工資料";
-    // 準備角色下拉選單的選項
     var roleOptions = new SelectList(new List<string> { "Engineer", "Manager", "HR", "Admin" });
+    // 【新增】準備狀態下拉選單的選項
+    var statusOptions = new SelectList(new List<string> { "在職", "離職" });
 }
 
 <style>
@@ -38,7 +39,11 @@
                         <span asp-validation-for="HireDate" class="text-danger"></span>
                     </div>
                 </div>
-
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Status" class="form-label"></label>
+                    <select asp-for="Status" class="form-control" asp-items="statusOptions"></select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
                 <div class="mb-3">
                     <label asp-for="EmployeeTitle" class="form-label"></label>
                     <input asp-for="EmployeeTitle" class="form-control" />
@@ -74,6 +79,7 @@
                         <input asp-for="EmergencyPhone" class="form-control" />
                         <span asp-validation-for="EmergencyPhone" class="text-danger"></span>
                     </div>
+
                 </div>
 
                 <h5 class="mt-4">系統登入資訊 (選填)</h5>

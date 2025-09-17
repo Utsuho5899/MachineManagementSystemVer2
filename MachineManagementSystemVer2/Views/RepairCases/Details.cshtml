@@ -31,7 +31,10 @@
         border-radius: .375rem;
         padding: 1rem;
     }
-
+    .timeline-entry p {
+            /* 2. 讓留言可以換行顯示 */
+            white-space: pre-wrap;
+    }
     .timeline-entry-footer {
         text-align: right;
         font-size: 0.9em;
@@ -40,9 +43,10 @@
         border-top: 1px dashed #ced4da;
         padding-top: 0.5rem;
     }
-
+    /* 3. 將初始留言的樣式改為淺黃色背景 */
     .timeline-initial-desc {
-        border-left: 5px solid #0d6efd;
+        background-color: #fffbe6;
+        border-color: #ffe58f;
     }
 
     .timeline-latest-desc {
@@ -85,7 +89,8 @@
         <h1>@Model.Title</h1>
         <div>
             <span class="badge bg-primary rounded-pill fs-6 me-2">@Model.CaseStatus</span>
-            <button onclick="window.print()" class="btn btn-secondary no-print"><i class="fas fa-print me-2"></i>列印</button>
+            <!-- 1. 列印按鈕改成回到案件列表按鈕 -->
+            <a asp-action="Index" class="btn btn-secondary no-print"><i class="fas fa-list me-2"></i>回到案件列表</a>
         </div>
     </div>
 

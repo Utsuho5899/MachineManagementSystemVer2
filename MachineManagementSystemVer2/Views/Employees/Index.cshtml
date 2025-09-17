@@ -4,12 +4,14 @@
     ViewData["Title"] = "員工列表";
 }
 
-<h1>@ViewData["Title"]</h1>
-
-<p>
-    <a asp-action="Create" class="btn btn-primary">新增員工</a>
-</p>
-<table class="table">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>@ViewData["Title"]</h1>
+    <div>
+        <a asp-controller="Employees" asp-action="Create" class="btn btn-primary">新增員工</a>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">回到首頁</a>
+    </div>
+</div>
+<table class="table table-hover">
     <thead>
         <tr>
             <th>
@@ -55,11 +57,9 @@
                     @Html.DisplayFor(modelItem => item.HireDate)
                 </td>
                 <td>
-                    @* TODO: 之後可以加入編輯/詳情/刪除的連結 *@
-                    @* 【修正】補上遺失的「刪除」連結 *@
-                    <a asp-controller="Employees" asp-action="Edit" asp-route-id="@item.EmployeeId">編輯</a> |
-                    <a asp-controller="Employees" asp-action="Details" asp-route-id="@item.EmployeeId">詳情</a> | 
-                    @* 【權限控制】只有 Admin 看得到刪除按鈕 *@
+                    @* 【修正】將所有操作連結都改為 Bootstrap 按鈕樣式 *@
+                    <a asp-controller="Employees" asp-action="Details" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-outline-info">詳情</a>
+                    <a asp-controller="Employees" asp-action="Edit" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-outline-secondary">編輯</a>
                     @if (User.IsInRole("Admin"))
                     {
                         <a asp-controller="Employees" asp-action="Delete" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-outline-danger">刪除</a>

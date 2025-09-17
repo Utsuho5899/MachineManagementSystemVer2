@@ -1,23 +1,21 @@
-﻿using MachineManagementSystemVer2.Data;
+﻿using Microsoft.AspNetCore.Mvc;
+using MachineManagementSystemVer2.Data;
 using MachineManagementSystemVer2.Models;
 using MachineManagementSystemVer2.ViewModels;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
+using System.Threading.Tasks;
+using System.Linq;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using System.Collections.Generic; // For List
-using System.Linq; // For OrderBy
-
+using Microsoft.AspNetCore.Http; // For IFormFile
+using System.IO; // For MemoryStream
 
 namespace MachineManagementSystemVer2.Controllers
 {
-    [Authorize(Roles = "Engineer,Manager,Admin")]
+    [Authorize]
     public class RepairCasesController : Controller
     {
         private readonly AppDbContext _context;
@@ -27,16 +25,83 @@ namespace MachineManagementSystemVer2.Controllers
             _context = context;
         }
 
-        // GET: RepairCases
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchStatus, int? searchEmployeeId, DateTime? searchStartDate, DateTime? searchEndDate)
         {
-            var repairCases = await _context.RepairCases
-                .Include(r => r.Device)
-                .Include(r => r.Plant)
-                .Include(r => r.Employee)
-                .OrderByDescending(r => r.OccurredAt)
+            var viewModel = new RepairCaseIndexViewModel
+            {
+                SearchStatus = searchStatus,
+                SearchEmployeeId = searchEmployeeId,
+                SearchStartDate = searchStartDate,
+                SearchEndDate = searchEndDate
+            };
+
+            viewModel.EmployeeList = new SelectList(await _context.Employees.OrderBy(e => e.EmployeeName).ToListAsync(), "EmployeeId", "EmployeeName", viewModel.SearchEmployeeId);
+            viewModel.StatusList = new SelectList(new List<string> { "OPEN", "暫置", "CLOSE" }, viewModel.SearchStatus);
+
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["StatusSortParm"] = sortOrder == "status_asc" ? "status_desc" : "status_asc";
+            ViewData["CustomerSortParm"] = sortOrder == "customer_asc" ? "customer_desc" : "customer_asc";
+            ViewData["PlantSortParm"] = sortOrder == "plant_asc" ? "plant_desc" : "plant_asc";
+            ViewData["DeviceSortParm"] = sortOrder == "device_asc" ? "device_desc" : "device_asc";
+            ViewData["LineSortParm"] = sortOrder == "line_asc" ? "line_desc" : "line_asc";
+            ViewData["EmployeeSortParm"] = sortOrder == "employee_asc" ? "employee_desc" : "employee_asc";
+            ViewData["DateSortParm"] = string.IsNullOrEmpty(sortOrder) ? "date_asc" : "";
+
+            var query = _context.RepairCases.AsQueryable();
+
+            if (viewModel.SearchEmployeeId.HasValue)
+            {
+                var empId = viewModel.SearchEmployeeId.Value;
+                query = query.Where(rc => rc.EmployeeId == empId || rc.CaseComments.Any(cc => cc.EmployeeId == empId));
+            }
+            if (viewModel.SearchStartDate.HasValue)
+            {
+                query = query.Where(rc => rc.OccurredAt >= viewModel.SearchStartDate.Value);
+            }
+            if (viewModel.SearchEndDate.HasValue)
+            {
+                query = query.Where(rc => rc.OccurredAt < viewModel.SearchEndDate.Value.AddDays(1));
+            }
+            if (!string.IsNullOrEmpty(viewModel.SearchStatus))
+            {
+                query = query.Where(rc => rc.CaseStatus == viewModel.SearchStatus);
+            }
+
+            switch (sortOrder)
+            {
+                case "status_asc":
+                    query = query.OrderBy(r => r.CaseStatus == "OPEN" ? 1 : r.CaseStatus == "暫置" ? 2 : 3);
+                    break;
+                case "status_desc":
+                    query = query.OrderByDescending(r => r.CaseStatus == "OPEN" ? 1 : r.CaseStatus == "暫置" ? 2 : 3);
+                    break;
+                case "customer_asc": query = query.OrderBy(r => r.Plant.Customer.CustomerName); break;
+                case "customer_desc": query = query.OrderByDescending(r => r.Plant.Customer.CustomerName); break;
+                case "plant_asc": query = query.OrderBy(r => r.Plant.PlantName); break;
+                case "plant_desc": query = query.OrderByDescending(r => r.Plant.PlantName); break;
+                case "device_asc": query = query.OrderBy(r => r.Device.DeviceModel); break;
+                case "device_desc": query = query.OrderByDescending(r => r.Device.DeviceModel); break;
+                case "line_asc": query = query.OrderBy(r => r.Device.ProductionLine); break;
+                case "line_desc": query = query.OrderByDescending(r => r.Device.ProductionLine); break;
+                case "employee_asc": query = query.OrderBy(r => r.Employee.EmployeeName); break;
+                case "employee_desc": query = query.OrderByDescending(r => r.Employee.EmployeeName); break;
+                case "date_asc": query = query.OrderBy(r => r.OccurredAt); break;
+                default: query = query.OrderByDescending(r => r.OccurredAt); break;
+            }
+
+            var filteredResults = await query
+                .Include(rc => rc.Plant).ThenInclude(p => p.Customer)
+                .Include(rc => rc.Device)
+                .Include(rc => rc.Employee)
+                .Include(rc => rc.CaseComments).ThenInclude(c => c.Employee) // For collaborator logic
                 .ToListAsync();
-            return View(repairCases);
+
+            viewModel.TotalCount = filteredResults.Count;
+            viewModel.ClosedCount = filteredResults.Count(rc => rc.CaseStatus == "CLOSE");
+            viewModel.OpenCount = viewModel.TotalCount - viewModel.ClosedCount;
+            viewModel.FilteredCases = filteredResults;
+
+            return View(viewModel);
         }
 
         private (int id, string name) _GetLoggedInEmployeeInfo()
@@ -325,6 +390,46 @@ namespace MachineManagementSystemVer2.Controllers
             }
 
             return Json(new { success = false, message = "沒有任何變更。" });
+        }
+
+        // --- 【新增】刪除功能 ---
+
+        // GET: RepairCases/Delete/5
+        [Authorize(Roles = "Manager,Admin")] // 只有主管和管理者可以存取
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var repairCase = await _context.RepairCases
+                .Include(r => r.Plant)
+                .Include(r => r.Device)
+                .FirstOrDefaultAsync(m => m.RepairCaseId == id);
+
+            if (repairCase == null)
+            {
+                return NotFound();
+            }
+
+            return View(repairCase);
+        }
+
+        // POST: RepairCases/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Manager,Admin")] // 只有主管和管理者可以執行
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var repairCase = await _context.RepairCases.FindAsync(id);
+            if (repairCase != null)
+            {
+                _context.RepairCases.Remove(repairCase);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

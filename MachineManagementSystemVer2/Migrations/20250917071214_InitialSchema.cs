@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MachineManagementSystemVer2.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreateWithDynamicHashes : Migration
+    public partial class InitialSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
