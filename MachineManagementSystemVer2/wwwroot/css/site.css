@@ -82,29 +82,42 @@ a {
         color: #0a58ca;
     }
 
+/* --- 【新增】首頁功能導覽卡片樣式 --- */
+.nav-card {
+    display: block;
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    text-decoration: none;
+    color: #212529;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+    .nav-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border-color: #0d6efd;
+    }
+
+    .nav-card .card-body {
+        padding: 2rem;
+    }
+
+        .nav-card .card-body i {
+            color: #0d6efd;
+        }
+
+    .nav-card .card-title {
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+
+    .nav-card .card-text {
+        color: #6c757d;
+    }
+
+
 /* --- 其他既有樣式 --- */
 /* (您 site.css 中其他的既有樣式可以保留在下方) */
-
-
-/*html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
-}*/

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MachineManagementSystemVer2.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250916025608_InitialCreateWithCompleteSeedData")]
-    partial class InitialCreateWithCompleteSeedData
+    [Migration("20250917033949_InitialCreateWithDynamicHashes")]
+    partial class InitialCreateWithDynamicHashes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

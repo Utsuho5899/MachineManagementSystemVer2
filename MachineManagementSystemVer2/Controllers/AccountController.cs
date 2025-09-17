@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using MachineManagementSystemVer2.Data;
+using MachineManagementSystemVer2.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MachineManagementSystemVer2.Data;
-using MachineManagementSystemVer2.ViewModels;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace MachineManagementSystemVer2.Controllers
 {
@@ -84,6 +85,52 @@ namespace MachineManagementSystemVer2.Controllers
         public async Task<IActionResult> Logout()
         {
             // 登出，清除 Cookie
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login", "Account");
+        }
+        // --- 【新增】修改密碼功能 ---
+
+        [Authorize] // 只有登入的使用者才能存取
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var employee = await _context.Employees.FindAsync(int.Parse(userId));
+
+            if (employee == null) return NotFound("找不到使用者。");
+
+            // 【還原】改回直接比對舊的明碼密碼
+            if (employee.Password != model.OldPassword)
+            {
+                ModelState.AddModelError("OldPassword", "目前的密碼不正確。");
+                return View(model);
+            }
+
+            // 【還原】直接儲存新的明碼密碼
+            employee.Password = model.NewPassword;
+            _context.Update(employee);
+            await _context.SaveChangesAsync();
+
+            ViewData["SuccessMessage"] = "密碼已成功更新！";
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
         }

@@ -6,6 +6,42 @@
     <title>@ViewData["Title"] - 設備維修管理系統</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <!-- 【新增】背景圖片樣式 -->
+    <style>
+        body {
+            /* 設置背景圖片 */
+            background-image: url('https://pr.tsmc.com/sites/pr/multimedia-gallery/407A9160_0.jpg');
+
+            /* 確保圖片填滿整個畫面且不重複 */
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+
+            /* 固定背景，使其在滾動時不移動 */
+            background-attachment: fixed;
+        }
+
+        /* 新增一個半透明的白色遮罩層，來達到淡化效果 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8); /* 調整最後一個數字 (0.8) 來控制淡化程度 */
+            z-index: -1;
+        }
+
+        /* 讓主要內容區域有微透明的背景，提升文字可讀性 */
+        .container main {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -17,46 +53,10 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <ul class="navbar-nav flex-grow-1">
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">儀表板</a>
-                            </li>
 
-                            @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Engineer"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="RepairCases" asp-action="Index">維修案件</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Customers" asp-action="Index">客戶管理</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Devices" asp-action="Index">設備管理</a>
-                                </li>
-                            }
-
-                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Kpi" asp-action="Index">工程師KPI</a>
-                                </li>
-                            }
-
-                            @if (User.IsInRole("Admin") || User.IsInRole("HR"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Employees" asp-action="Index">員工管理</a>
-                                </li>
-                            }
-                        </ul>
-                    }
-                    else
-                    {
-                        @* 如果未登入，顯示一個空的 ul 以維持排版 *@
-                        <ul class="navbar-nav flex-grow-1"></ul>
-                    }
+                    <ul class="navbar-nav flex-grow-1">
+                        @* 這個空的 ul 會佔用中間的空間，將登入/登出按鈕推到最右側 *@
+                    </ul>
 
                     <div class="navbar-nav">
                         @if (User.Identity.IsAuthenticated)
