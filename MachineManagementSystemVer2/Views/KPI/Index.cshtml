@@ -28,7 +28,12 @@
             }
 </style>
 
-<h1>@ViewData["Title"]</h1>
+<div class="d-flex justify-content-between align-items-center">
+    <h1>@ViewData["Title"]</h1>
+    <div>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">回到首頁</a>
+    </div>
+</div>
 
 <!-- 篩選表單 -->
 <div class="card shadow-sm mb-4">

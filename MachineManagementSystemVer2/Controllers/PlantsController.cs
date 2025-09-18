@@ -134,5 +134,27 @@ namespace MachineManagementSystemVer2.Controllers
             }
             return View(viewModel);
         }
+        // GET: Plants/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            // 查詢廠區資料，並同時載入其所屬的客戶(Customer)和旗下的設備(Devices)
+            var plant = await _context.Plants
+                .Include(p => p.Customer)
+                .Include(p => p.Devices)
+                .FirstOrDefaultAsync(m => m.PlantId == id);
+
+            if (plant == null)
+            {
+                return NotFound();
+            }
+
+            return View(plant);
+        }
+
     }
 }

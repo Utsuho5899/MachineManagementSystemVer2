@@ -31,7 +31,7 @@ namespace MachineManagementSystemVer2.ViewModels
         [Display(Name = "首發時間")]
         public DateTime OccurredDate { get; set; } = DateTime.Today;
 
-        [Range(9, 23, ErrorMessage = "請選擇小時")]
+        //[Range(9, 23, ErrorMessage = "請選擇小時")]
         [Display(Name = "時")]
         public int OccurredHour { get; set; } = DateTime.Now.Hour;
 

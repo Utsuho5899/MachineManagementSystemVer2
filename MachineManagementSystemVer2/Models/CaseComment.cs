@@ -26,5 +26,10 @@ namespace MachineManagementSystemVer2.Models
         public int EmployeeId { get; set; }
         [ForeignKey("EmployeeId")] // 修正 ForeignKey 指向正確的屬性
         public Employee Employee { get; set; }
+
+        //// --- 【請新增以下這兩行】 ---
+        public int? CasePhotoId { get; set; }
+        [ForeignKey("CasePhotoId")]
+        public virtual CasePhoto? CasePhoto { get; set; }
     }
 }

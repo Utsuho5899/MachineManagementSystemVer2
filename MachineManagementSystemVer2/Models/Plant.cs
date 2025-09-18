@@ -26,7 +26,7 @@ namespace MachineManagementSystemVer2.Models
 
         [ForeignKey("Customer")]
         public int CustomerId { get; set; }
-        public Customer Customer { get; set; }
+        public Customer? Customer { get; set; }
 
         // --- 【新增】補上完整的導覽屬性，讓模型關聯更清晰 ---
         public ICollection<Device> Devices { get; set; } = new List<Device>();

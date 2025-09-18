@@ -4,6 +4,7 @@ namespace MachineManagementSystemVer2.ViewModels
 {
     public class PlantCreateViewModel
     {
+        [Required]
         // 這個隱藏欄位至關重要，用於記錄此廠區屬於哪個客戶
         public int CustomerId { get; set; }
 

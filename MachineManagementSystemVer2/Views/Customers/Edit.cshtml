@@ -104,6 +104,12 @@
                         <label for="plantName" class="form-label">廠區名稱 *</label>
                         <input type="text" class="form-control" id="plantName" name="PlantName" required>
                     </div>
+                    @* 【新增】補上 PlantCode 的輸入欄位 *@
+                    <div class="mb-3">
+                        <label for="plantCode" class="form-label">廠區代稱</label>
+                        <input type="text" class="form-control" id="plantCode" name="PlantCode">
+                    </div>
+
                     <div class="mb-3">
                         <label for="plantAddress" class="form-label">廠區地址 *</label>
                         <input type="text" class="form-control" id="plantAddress" name="PlantAddress" required>
@@ -143,11 +149,15 @@
                     url: '@Url.Action("AddPlant", "Customers")',
                     data: form.serialize(),
                     success: function (response) {
-                        if (response.success) {
-                            // 成功後直接重新整理頁面，以確保新廠區的編輯連結有效
-                            location.reload();
+                       if (response.success) {
+                            location.reload(); // 成功後直接重新整理頁面
                         } else {
-                            $('#addPlantError').text(response.message || '儲存失敗。');
+                            // 【優化】如果後端回傳了詳細的錯誤列表，就顯示出來
+                            if(response.errors) {
+                                $('#addPlantError').html(response.errors.join('<br>'));
+                            } else {
+                                $('#addPlantError').text(response.message || '儲存失敗。');
+                            }
                         }
                     },
                     error: function () {

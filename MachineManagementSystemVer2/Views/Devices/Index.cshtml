@@ -4,10 +4,134 @@
     ViewData["Title"] = "設備總覽";
 }
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+<style>
+    .sort-link {
+        text-decoration: none;
+        color: inherit;
+    }
+
+        .sort-link:hover {
+            color: #0b5ed7;
+        }
+
+        .sort-link .arrow {
+            display: inline-block;
+            width: 1.2em;
+            text-align: center;
+            color: #6c757d;
+        }
+
+            .sort-link .arrow.active {
+                color: #0d6efd;
+            }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+    <div>
+        <a asp-controller="Devices" asp-action="Create" class="btn btn-primary">新增設備</a>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">回到首頁</a>
+    </div>
+</div>
+
+<div class="card shadow-sm my-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">客戶名稱</label>
+                    <input type="text" name="searchCustomer" value="@ViewData["CurrentFilterCustomer"]" class="form-control" placeholder="依客戶名稱篩選" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">廠區名稱</label>
+                    <input type="text" name="searchPlant" value="@ViewData["CurrentFilterPlant"]" class="form-control" placeholder="依廠區名稱篩選" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">設備機型</label>
+                    <input type="text" name="searchModel" value="@ViewData["CurrentFilterModel"]" class="form-control" placeholder="依設備機型篩選" />
+                </div>
+                <div class="col-md-3">
+                    <div class="d-grid gap-2 d-md-flex">
+                        <button type="submit" class="btn btn-primary">查詢</button>
+                        <a asp-action="Index" class="btn btn-secondary">清除</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        <a class="sort-link" asp-action="Index" asp-route-sortOrder="@ViewData["CustomerSortParm"]" asp-route-searchCustomer="@ViewData["CurrentFilterCustomer"]" asp-route-searchPlant="@ViewData["CurrentFilterPlant"]" asp-route-searchModel="@ViewData["CurrentFilterModel"]">
+                            客戶名稱
+                            <span class="arrow @(string.IsNullOrEmpty(ViewData["CurrentSort"] as string) || (ViewData["CurrentSort"]?.ToString().Contains("customer_") ?? false) ? "active" : "")">
+                                <i class="fas @(ViewData["CurrentSort"] as string == "customer_desc" ? "fa-sort-down" : "fa-sort-up")"></i>
+                            </span>
+                        </a>
+                    </th>
+                    <th>
+                        <a class="sort-link" asp-action="Index" asp-route-sortOrder="@ViewData["PlantSortParm"]" asp-route-searchCustomer="@ViewData["CurrentFilterCustomer"]" asp-route-searchPlant="@ViewData["CurrentFilterPlant"]" asp-route-searchModel="@ViewData["CurrentFilterModel"]">
+                            廠區名稱
+                            <span class="arrow @(ViewData["CurrentSort"]?.ToString().Contains("plant_") ?? false ? "active" : "")">
+                                <i class="fas @(ViewData["CurrentSort"] as string == "plant_asc" ? "fa-sort-up" : (ViewData["CurrentSort"] as string == "plant_desc" ? "fa-sort-down" : "fa-sort"))"></i>
+                            </span>
+                        </a>
+                    </th>
+                    <th>
+                        <a class="sort-link" asp-action="Index" asp-route-sortOrder="@ViewData["ModelSortParm"]" asp-route-searchCustomer="@ViewData["CurrentFilterCustomer"]" asp-route-searchPlant="@ViewData["CurrentFilterPlant"]" asp-route-searchModel="@ViewData["CurrentFilterModel"]">
+                            設備機型
+                            <span class="arrow @(ViewData["CurrentSort"]?.ToString().Contains("model_") ?? false ? "active" : "")">
+                                <i class="fas @(ViewData["CurrentSort"] as string == "model_asc" ? "fa-sort-up" : (ViewData["CurrentSort"] as string == "model_desc" ? "fa-sort-down" : "fa-sort"))"></i>
+                            </span>
+                        </a>
+                    </th>
+                    <th>@Html.DisplayNameFor(model => model.SerialNumber)</th>
+                    <th>@Html.DisplayNameFor(model => model.ProductionLine)</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.Plant.Customer.CustomerName)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Plant.PlantName)</td>
+                        <td>@Html.DisplayFor(modelItem => item.DeviceModel)</td>
+                        <td>@Html.DisplayFor(modelItem => item.SerialNumber)</td>
+                        <td>@Html.DisplayFor(modelItem => item.ProductionLine)</td>
+                        <td>
+                            <a asp-controller="Devices" asp-action="Details" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-info">詳情</a>
+                            <a asp-controller="Devices" asp-action="Edit" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-secondary">編輯</a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a asp-controller="Devices" asp-action="Delete" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-danger">刪除</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@* @model IEnumerable<MachineManagementSystemVer2.Models.Device>
+
+@{
+    ViewData["Title"] = "設備總覽";
+}
+
 <h1>@ViewData["Title"]</h1>
 
 <p>
     <a asp-controller="Devices" asp-action="Create" class="btn btn-primary">新增設備</a>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">回到首頁</a>
 </p>
 
 <!-- 【新增】篩選表單 -->
@@ -34,7 +158,7 @@
     <thead>
         <tr>
             <th>
-                @* 【更新】將標題改為可點擊的排序連結 *@
+                @* 【更新】將標題改為可點擊的排序連結 
                 <a asp-action="Index" asp-route-sortOrder="@ViewData["CustomerSortParm"]"
                    asp-route-searchCustomer="@ViewData["CurrentFilterCustomer"]" asp-route-searchPlant="@ViewData["CurrentFilterPlant"]" asp-route-searchModel="@ViewData["CurrentFilterModel"]">客戶名稱</a>
             </th>
@@ -43,7 +167,7 @@
                    asp-route-searchCustomer="@ViewData["CurrentFilterCustomer"]" asp-route-searchPlant="@ViewData["CurrentFilterPlant"]" asp-route-searchModel="@ViewData["CurrentFilterModel"]">廠區名稱</a>
             </th>
             <th>
-                @* 【新增】設備機型欄位，並加入排序功能 *@
+                @* 【新增】設備機型欄位，並加入排序功能 
                 <a asp-action="Index" asp-route-sortOrder="@ViewData["ModelSortParm"]"
                    asp-route-searchCustomer="@ViewData["CurrentFilterCustomer"]" asp-route-searchPlant="@ViewData["CurrentFilterPlant"]" asp-route-searchModel="@ViewData["CurrentFilterModel"]">設備機型</a>
             </th>
@@ -67,7 +191,7 @@
                     @Html.DisplayFor(modelItem => item.Plant.PlantName)
                 </td>
                 <td>
-                    @* 【新增】顯示設備機型 *@
+                    @* 【新增】顯示設備機型 
                     @Html.DisplayFor(modelItem => item.DeviceModel)
                 </td>
                 <td>
@@ -77,10 +201,10 @@
                     @Html.DisplayFor(modelItem => item.ProductionLine)
                 </td>
                 <td>
-                    @* 【修正】移除刪除按鈕，並美化其餘按鈕 *@
+                    @* 【修正】移除刪除按鈕，並美化其餘按鈕 
                     <a asp-controller="Devices" asp-action="Details" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-info">詳情</a>
                     <a asp-controller="Devices" asp-action="Edit" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-secondary">編輯</a>
-                    @* 【權限控制】只有 Admin 看得到刪除按鈕 *@
+                    @* 【權限控制】只有 Admin 看得到刪除按鈕 
                     @if (User.IsInRole("Admin"))
                     {
                         <a asp-controller="Devices" asp-action="Delete" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-danger">刪除</a>
@@ -90,4 +214,4 @@
         }
     </tbody>
 </table>
-
+ *@

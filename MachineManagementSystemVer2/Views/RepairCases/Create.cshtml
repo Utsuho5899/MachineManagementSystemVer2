@@ -3,10 +3,9 @@
 @{
     ViewData["Title"] = "建立維修案件";
 
-    // 【修正】將小時的選項排序調整為從 9-23 點開始，再接續 0-8 點
-    var workHours = Enumerable.Range(9, 15); // 產生 9, 10, ..., 23
-    var nightHours = Enumerable.Range(0, 9);  // 產生 0, 1, ..., 8
-    var allHoursInOrder = workHours.Concat(nightHours); // 將兩個序列合併
+    var workHours = Enumerable.Range(9, 15);
+    var nightHours = Enumerable.Range(0, 9);
+    var allHoursInOrder = workHours.Concat(nightHours);
     var hourOptions = allHoursInOrder.Select(h => new SelectListItem { Value = h.ToString(), Text = h.ToString("00") });
 
     var minuteOptions = new List<SelectListItem>
@@ -20,15 +19,16 @@
 
 <style>
     .form-container {
-        font-size: 1.5rem; /* 從預設的 1rem (16px) 放大 */
+        font-size: 1.5rem;
     }
+
     .info-box {
         background-color: #e9ecef;
         padding: 0.5rem 1rem;
         border-radius: 0.25rem;
         font-weight: 600;
     }
-    /* --- 【新增】為所有下拉式選單加入向下箭頭圖示 --- */
+
     select.form-control {
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -37,11 +37,9 @@
         background-repeat: no-repeat;
         background-position: right 0.75rem center;
         background-size: 16px 12px;
-        padding-right: 2.5rem; /* 確保文字不會蓋到箭頭 */
+        padding-right: 2.5rem;
     }
 </style>
-
-
 
 <div class="form-container">
     <div class="d-flex justify-content-between align-items-center">
@@ -54,10 +52,8 @@
 
     <div class="row">
         <div class="col-md-10">
-            @* 【關鍵】確保所有表單元素都在這一個 form 標籤之內 *@
             <form asp-action="Create" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
-                @* 顯示所有驗證錯誤，而不僅僅是模型級別的 *@
                 <div asp-validation-summary="All" class="text-danger"></div>
 
                 <div class="row">
@@ -118,7 +114,6 @@
                             </select>
                         </div>
                     </div>
-                    <!-- 【新增】案件標題輸入框 -->
                     <div class="mb-3">
                         <label asp-for="Title" class="form-label"></label>
                         <input asp-for="Title" class="form-control" />
@@ -139,15 +134,15 @@
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="CaseRemark" class="form-label"></label>
-                    <textarea asp-for="CaseRemark" class="form-control" rows="3"></textarea>
-                    <span asp-validation-for="CaseRemark" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
                     <label asp-for="Photos" class="form-label"></label>
                     <input asp-for="Photos" class="form-control" type="file" multiple accept="image/*" />
                     <div id="photoPreview" class="mt-2 d-flex flex-wrap"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CaseRemark" class="form-label"></label>
+                    <textarea asp-for="CaseRemark" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="CaseRemark" class="text-danger"></span>
                 </div>
 
                 <div class="d-flex justify-content-start mt-4">
@@ -213,7 +208,8 @@
                         reader.onload = function(e) {
                             var img = $('<img />', {
                                 src: e.target.result,
-                                style: 'width: 150px; height: 150px; object-fit: cover; margin: 5px; border: 1px solid #ddd; border-radius: 4px;'
+                                // 【調整尺寸】將預覽圖縮小為 100x100
+                                style: 'width: 100px; height: 100px; object-fit: cover; margin: 5px; border: 1px solid #ddd; border-radius: 4px;'
                              });
                             previewContainer.append(img);
                         }
@@ -224,4 +220,3 @@
         });
     </script>
 }
-

@@ -161,6 +161,9 @@
                         <label asp-for="NewPhoto" class="form-label"></label>
                         <input asp-for="NewPhoto" class="form-control" type="file" accept="image/*">
                     </div>
+                    <div class="col-12 mb-3">
+                        <img id="photoPreview" src="#" alt="圖片預覽" class="img-fluid rounded" style="display:none; max-width: 400px; max-height: 400px; border: 1px solid #ddd;" />
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label asp-for="NewCommentContent" class="form-label"></label>
@@ -172,6 +175,19 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">照片預覽</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="" id="modalImage" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -180,9 +196,7 @@
         $(document).ready(function() {
             var timelineList = $('#caseTimelineList');
 
-            // --- 【修正】重寫排序和折疊的 JavaScript 邏輯 ---
-
-            // 排序功能
+            // --- 排序功能 ---
             function sortTimeline(order) {
                 var items = timelineList.children('.timeline-entry').get();
                 items.sort(function(a, b) {
@@ -191,35 +205,25 @@
                     return (order === 'asc') ? (keyA > keyB ? 1 : -1) : (keyA < keyB ? 1 : -1);
                 });
                 $.each(items, function(i, el) {
-                    timelineList.append(el); // 重新將排序後的項目加回容器
+                    timelineList.append(el);
                 });
-                setupCollapsing(); // 排序後需要重新設定折疊
+                setupCollapsing();
             }
 
-            // 折疊功能
+            // --- 折疊功能 ---
             function setupCollapsing() {
-                // 先移除舊的按鈕和樣式
                 $('#toggle-button').remove();
                 timelineList.children('.timeline-entry').show().removeClass('middle-entry timeline-latest-desc');
-
                 var entries = timelineList.children('.timeline-entry');
                 if (entries.length > 2) {
-                    // 將中間的項目隱藏起來
                     var middleEntries = entries.slice(1, -1).hide().addClass('middle-entry');
-
-                    // 標記最後一個項目
                     entries.last().addClass('timeline-latest-desc');
-
-                    // 插入展開按鈕
                     var toggleButton = $('<div id="toggle-button" class="toggle-middle-entries no-print"><i class="fas fa-ellipsis-h"></i> 顯示 ' + middleEntries.length + ' 筆中間歷程</div>');
                     entries.first().after(toggleButton);
                 }
             }
 
-            // 初始設定
-            sortTimeline('desc'); // 預設由新到舊
-
-            // 綁定排序按鈕事件
+            // --- 事件綁定：排序按鈕 ---
             $('#sortNewest').on('click', function() {
                 sortTimeline('desc');
                 $(this).addClass('active').siblings().removeClass('active');
@@ -229,15 +233,13 @@
                 $(this).addClass('active').siblings().removeClass('active');
             });
 
-            // 綁定展開/收合按鈕事件 (使用事件委派)
+            // --- 事件綁動：折疊按鈕 ---
             $('body').on('click', '#toggle-button', function() {
                 var middleEntries = $('.middle-entry');
                 var isHidden = middleEntries.is(':hidden');
-                middleEntries.slideToggle(); // 使用動畫效果
-
+                middleEntries.slideToggle();
                 var icon = $(this).find('i');
                 var textNode = $(this).contents().filter(function() { return this.nodeType == 3; }).first();
-
                 if (isHidden) {
                     icon.removeClass('fa-ellipsis-h').addClass('fa-minus');
                     textNode.replaceWith(" 隱藏中間歷程");
@@ -247,8 +249,21 @@
                 }
             });
 
-            // --- 更新案件的 AJAX (維持不變) ---
-            $('#updateCaseForm').on('submit', function(e) {
+            // --- 事件綁定：圖片預覽 ---
+            $('#NewPhoto').on('change', function() {
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#photoPreview').attr('src', e.target.result).show();
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                } else {
+                    $('#photoPreview').hide().attr('src', '#');
+                }
+            });
+
+            // --- 【最終修正】改用事件委派的方式綁定表單送出 ---
+            $(document).on('submit', '#updateCaseForm', function(e) {
                 e.preventDefault();
                 $('#updateError').text('');
                 var formData = new FormData(this);
@@ -268,10 +283,23 @@
                         }
                     },
                     error: function() {
-                         $('#updateError').text('與伺服器通訊失敗。');
+                        $('#updateError').text('與伺服器通訊失敗。');
                     }
                 });
             });
+
+            // --- 事件綁定：圖片放大 Modal ---
+            var imageModal = document.getElementById('imageModal');
+            imageModal.addEventListener('show.bs.modal', function(event) {
+                var triggerElement = event.relatedTarget;
+                var imageSrc = triggerElement.getAttribute('data-bs-imgsrc');
+                var modalImage = document.getElementById('modalImage');
+                modalImage.src = imageSrc;
+            });
+
+            // --- 初始設定 ---
+            sortTimeline('desc');
+
         });
     </script>
 }

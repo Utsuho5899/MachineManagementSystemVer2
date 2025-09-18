@@ -4,106 +4,52 @@
     ViewData["Title"] = "設備詳情";
 }
 
-<style>
-    .details-container {
-        font-size: 1.15rem;
-    }
+<h1>@Model.DeviceModel 設備詳情</h1>
+<h4>位於：@Model.Plant.Customer.CustomerName - @Model.Plant.PlantName</h4>
+<hr />
 
-    .details-grid {
-        display: grid;
-        grid-template-columns: 150px 1fr;
-        gap: 0.75rem 1.5rem;
-    }
+<div class="card shadow-sm mb-4">
+    <div class="card-header"><h5 class="mb-0">設備基本資料</h5></div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">設備機型</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.DeviceModel)</dd>
 
-        .details-grid dt {
-            font-weight: 600;
-            text-align: right;
-            color: #6c757d;
+            <dt class="col-sm-3">出廠序號</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.SerialNumber)</dd>
+
+            <dt class="col-sm-3">客戶產線代稱</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.ProductionLine)</dd>
+
+            <dt class="col-sm-3">備註</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Remark)</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header"><h5 class="mb-0">相關維修案件</h5></div>
+    <div class="card-body">
+        @if (Model.RepairCases.Any())
+        {
+            <div class="list-group">
+                @foreach (var repairCase in Model.RepairCases)
+                {
+                    <a asp-controller="RepairCases" asp-action="Details" asp-route-id="@repairCase.RepairCaseId" class="list-group-item list-group-item-action">
+                        @repairCase.Title
+                        <small class="text-muted">(開單人員: @repairCase.Employee.EmployeeName, 狀態: @repairCase.CaseStatus)</small>
+                    </a>
+                }
+            </div>
         }
-</style>
-
-<div class="details-container">
-    <h1>@Model.Plant.Customer.CustomerName - @Model.DeviceModel</h1>
-    <hr />
-
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">設備詳細資料</h5>
-        </div>
-        <div class="card-body">
-            <dl class="details-grid">
-                <dt>客戶名稱</dt>
-                <dd>@Html.DisplayFor(model => model.Plant.Customer.CustomerName)</dd>
-
-                <dt>@Html.DisplayNameFor(model => model.Plant)</dt>
-                <dd>@Html.DisplayFor(model => model.Plant.PlantName)</dd>
-
-                <dt>@Html.DisplayNameFor(model => model.DeviceModel)</dt>
-                <dd>@Html.DisplayFor(model => model.DeviceModel)</dd>
-
-                <dt>@Html.DisplayNameFor(model => model.SerialNumber)</dt>
-                <dd>@Html.DisplayFor(model => model.SerialNumber)</dd>
-
-                <dt>@Html.DisplayNameFor(model => model.ProductionLine)</dt>
-                <dd>@Html.DisplayFor(model => model.ProductionLine)</dd>
-
-                <dt>@Html.DisplayNameFor(model => model.Remark)</dt>
-                <dd>@Html.DisplayFor(model => model.Remark)</dd>
-    </dl>
-</div>
+        else
+        {
+            <p class="text-muted">此設備尚無任何維修案件。</p>
+        }
     </div>
-
-    <div class="card shadow-sm">
-        <div class="card-header">
-            <h5 class="mb-0">異常歷史案件列表</h5>
-        </div>
-        <div class="card-body">
-            @if (Model.RepairCases.Any())
-            {
-                <ul class="list-group list-group-flush">
-                    @foreach (var repairCase in Model.RepairCases.OrderByDescending(rc => rc.OccurredAt))
-                    {
-                        // 【新增】根據案件狀態決定徽章的顏色
-                        var statusBadgeClass = "bg-secondary";
-                        switch (repairCase.CaseStatus)
-                        {
-                            case "OPEN":
-                                statusBadgeClass = "bg-danger";
-                                break;
-                            case "CLOSE":
-                                statusBadgeClass = "bg-success";
-                                break;
-                            case "暫置":
-                                statusBadgeClass = "bg-warning text-dark";
-                                break;
-                        }
-
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            @* 左側顯示標題和狀態 *@
-                            <span>
-                                @repairCase.Title
-                                <span class="badge @statusBadgeClass ms-2">@repairCase.CaseStatus</span>
-                            </span>
-
-                            <div class="d-flex align-items-center">
-                                <small class="text-muted me-3">
-                                    @repairCase.Employee.EmployeeName - @repairCase.OccurredAt.ToString("yyyy/MM/dd")
-                                </small>
-                                <a asp-controller="RepairCases" asp-action="Details" asp-route-id="@repairCase.RepairCaseId" class="btn btn-sm btn-outline-primary">檢視</a>
-                            </div>
-                        </li>
-                    }
-                </ul>
-            }
-            else
-            {
-                <p class="text-muted mb-0">此設備尚無維修案件紀錄。</p>
-            }
-        </div>
-    </div>
-
-    <div class="mt-4">
-    <a asp-action="Edit" asp-route-id="@Model?.DeviceId" class="btn btn-primary">編輯</a>
-    <a asp-action="Index" class="btn btn-secondary">返回列表</a>
 </div>
+
+<div class="mt-4">
+    <a asp-action="Edit" asp-route-id="@Model.DeviceId" class="btn btn-primary">編輯設備</a>
+    <a asp-controller="Plants" asp-action="Details" asp-route-id="@Model.PlantId" class="btn btn-secondary">返回廠區詳情</a>
 </div>

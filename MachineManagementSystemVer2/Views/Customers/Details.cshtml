@@ -53,7 +53,9 @@
                 <ul class="list-group list-group-flush">
                     @foreach (var plant in Model.Plants)
                     {
-                        <li class="list-group-item">@plant.PlantName (@plant.PlantAddress)</li>
+                        <a asp-controller="Plants" asp-action="Details" asp-route-id="@plant.PlantId" class="list-group-item list-group-item-action">
+                            @plant.PlantName <small class="text-muted">(@plant.PlantAddress)</small>
+                        </a>
                     }
                 </ul>
             }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MachineManagementSystemVer2.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSchema : Migration
+    public partial class AddPhotoRelationToComment : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -146,34 +146,6 @@ namespace MachineManagementSystemVer2.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CaseComments",
-                columns: table => new
-                {
-                    CommentId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CaseId = table.Column<int>(type: "int", nullable: false),
-                    CaseComments = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EmployeeId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CaseComments", x => x.CommentId);
-                    table.ForeignKey(
-                        name: "FK_CaseComments_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "EmployeeId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_CaseComments_RepairCases_CaseId",
-                        column: x => x.CaseId,
-                        principalTable: "RepairCases",
-                        principalColumn: "RepairCaseId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "CaseHistories",
                 columns: table => new
                 {
@@ -218,6 +190,40 @@ namespace MachineManagementSystemVer2.Migrations
                     table.PrimaryKey("PK_CasePhotos", x => x.PhotoId);
                     table.ForeignKey(
                         name: "FK_CasePhotos_RepairCases_CaseId",
+                        column: x => x.CaseId,
+                        principalTable: "RepairCases",
+                        principalColumn: "RepairCaseId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CaseComments",
+                columns: table => new
+                {
+                    CommentId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CaseId = table.Column<int>(type: "int", nullable: false),
+                    CaseComments = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    CasePhotoId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CaseComments", x => x.CommentId);
+                    table.ForeignKey(
+                        name: "FK_CaseComments_CasePhotos_CasePhotoId",
+                        column: x => x.CasePhotoId,
+                        principalTable: "CasePhotos",
+                        principalColumn: "PhotoId");
+                    table.ForeignKey(
+                        name: "FK_CaseComments_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "EmployeeId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CaseComments_RepairCases_CaseId",
                         column: x => x.CaseId,
                         principalTable: "RepairCases",
                         principalColumn: "RepairCaseId",
@@ -281,6 +287,11 @@ namespace MachineManagementSystemVer2.Migrations
                 name: "IX_CaseComments_CaseId",
                 table: "CaseComments",
                 column: "CaseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CaseComments_CasePhotoId",
+                table: "CaseComments",
+                column: "CasePhotoId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CaseComments_EmployeeId",

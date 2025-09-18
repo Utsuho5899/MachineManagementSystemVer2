@@ -7,19 +7,32 @@ using Microsoft.AspNetCore.Http;
 
 namespace MachineManagementSystemVer2.ViewModels
 {
-    // 【新增】用於整合「初始描述」和「後續留言」的輔助類別
+    // 【修改】這個輔助類別，讓它可以攜帶多張照片
     public class TimelineEntry
     {
+        // 建立一個小類別來儲存單張照片的資訊
+        public class PhotoInfo
+        {
+            public byte[] PhotoData { get; set; }
+            public string FileName { get; set; }
+        }
+
         public enum EntryType { Initial, Comment, StatusChange }
 
+        // --- 共同屬性 ---
         public EntryType Type { get; set; }
         public DateTime Timestamp { get; set; }
-        public string Content { get; set; }
         public string Author { get; set; }
 
-        // 僅用於狀態變更
-        public string OldStatus { get; set; }
-        public string NewStatus { get; set; }
+        // --- 留言或描述的內容 ---
+        public string? Content { get; set; }
+
+        // --- 狀態變更專用屬性 ---
+        public string? OldStatus { get; set; }
+        public string? NewStatus { get; set; }
+
+        // --- 照片專用屬性 (從單張改為列表) ---
+        public List<PhotoInfo> Photos { get; set; } = new List<PhotoInfo>();
     }
 
     public class RepairCaseDetailViewModel

@@ -123,39 +123,43 @@ namespace MachineManagementSystemVer2.Controllers
                 return View(customerWithPlants);
             }
 
-                // --- 【新增】用於處理 AJAX 新增廠區的 Action ---
-                [HttpPost]
-                [ValidateAntiForgeryToken]
-                public async Task<IActionResult> AddPlant(Plant plant)
+
+            // --- AJAX Action to Add a Plant ---
+            [HttpPost]
+            [ValidateAntiForgeryToken]
+            public async Task<IActionResult> AddPlant(Plant plant)
+            {
+                // We remove the manual check for CustomerId existence because
+                // the model binding and validation will handle it if CustomerId is required in the Plant model.
+
+                // 【修正】我們需要確保 PlantCode 即使是選填，也能被正確處理
+                // 如果 Plant Model 中 PlantCode 是可為 null 的 (string?), 這裡就不會有問題。
+                // 如果是必填，前端表單就必須提供這個欄位。
+                if (ModelState.IsValid)
                 {
-                    // 為了安全性，再次檢查傳入的 CustomerId 是否存在
-                    if (!await _context.Customers.AnyAsync(c => c.CustomerId == plant.CustomerId))
+                    try
                     {
-                        return Json(new { success = false, message = "無效的客戶ID。" });
+                        _context.Plants.Add(plant);
+                        await _context.SaveChangesAsync();
+                        // Return the full plant object on success
+                        return Json(new { success = true, plant });
                     }
-
-                    if (ModelState.IsValid)
+                    catch (Exception ex)
                     {
-                        try
-                        {
-                            _context.Plants.Add(plant);
-                            await _context.SaveChangesAsync();
-                            return Json(new { success = true, plant });
-                        }
-                        catch (Exception ex)
-                        {
-                            return Json(new { success = false, message = ex.Message });
-                        }
+                        return Json(new { success = false, message = ex.Message });
                     }
-                    // 如果模型驗證失敗，回傳錯誤訊息
-                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-                    return Json(new { success = false, message = "輸入資料有誤。", errors = errors });
                 }
+                // If model validation fails, collect and return the errors
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return Json(new { success = false, message = "輸入資料有誤。", errors });
+            }
 
-        private bool CustomerExists(int id)
+            private bool CustomerExists(int id)
             {
                 return _context.Customers.Any(e => e.CustomerId == id);
             }
-        }
+
+
+            }
         }
     }

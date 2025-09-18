@@ -38,6 +38,9 @@ namespace MachineManagementSystemVer2.Migrations
                     b.Property<int>("CaseId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CasePhotoId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -47,6 +50,8 @@ namespace MachineManagementSystemVer2.Migrations
                     b.HasKey("CommentId");
 
                     b.HasIndex("CaseId");
+
+                    b.HasIndex("CasePhotoId");
 
                     b.HasIndex("EmployeeId");
 
@@ -581,11 +586,17 @@ namespace MachineManagementSystemVer2.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MachineManagementSystemVer2.Models.CasePhoto", "CasePhoto")
+                        .WithMany()
+                        .HasForeignKey("CasePhotoId");
+
                     b.HasOne("MachineManagementSystemVer2.Models.Employee", "Employee")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("CasePhoto");
 
                     b.Navigation("Employee");
 

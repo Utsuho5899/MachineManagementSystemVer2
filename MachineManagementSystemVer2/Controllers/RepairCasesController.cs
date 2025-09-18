@@ -216,44 +216,60 @@ namespace MachineManagementSystemVer2.Controllers
                                         .ToListAsync();
             return Json(devices);
         }
-
         // GET: RepairCases/Details/5
         public async Task<IActionResult> Details(int id)
         {
             var repairCase = await _context.RepairCases
                 .Include(rc => rc.Employee)
-                .Include(rc => rc.Plant).ThenInclude(p => p.Customer) // 載入客戶
+                .Include(rc => rc.Plant).ThenInclude(p => p.Customer)
                 .Include(rc => rc.Device)
                 .Include(rc => rc.CaseComments).ThenInclude(cc => cc.Employee)
-                .Include(rc => rc.CasePhotos)
-                .Include(rc => rc.CaseHistories).ThenInclude(ch => ch.Employee) // 載入歷史紀錄
+                .Include(rc => rc.CaseComments).ThenInclude(cc => cc.CasePhoto)
+                .Include(rc => rc.CasePhotos) // 讀取案件下的所有照片
+                .Include(rc => rc.CaseHistories).ThenInclude(ch => ch.Employee)
                 .FirstOrDefaultAsync(rc => rc.RepairCaseId == id);
 
             if (repairCase == null) return NotFound();
 
-            // --- 建立整合後的時間軸 (Timeline) ---
             var timeline = new List<TimelineEntry>();
 
-            // 1. 加入初始的故障內容描述
+            // --- 【修改的關鍵邏輯】 ---
+            // 1. 先找出所有已經被「後續留言」關聯走的照片ID
+            var commentPhotoIds = repairCase.CaseComments
+                .Where(c => c.CasePhotoId.HasValue)
+                .Select(c => c.CasePhotoId.Value)
+                .ToHashSet();
 
+            // 2. 案件的所有照片中，排除掉已被留言關聯的，剩下的就是「初始照片」
+            var initialPhotos = repairCase.CasePhotos
+                .Where(p => !commentPhotoIds.Contains(p.PhotoId))
+                .Select(p => new TimelineEntry.PhotoInfo { PhotoData = p.PhotoData, FileName = p.FileName })
+                .ToList();
+
+            // 3. 建立第一筆歷程，並把「初始照片」列表放進去
             timeline.Add(new TimelineEntry
             {
                 Type = TimelineEntry.EntryType.Initial,
                 Timestamp = repairCase.OccurredAt,
                 Content = repairCase.Description,
-                Author = repairCase.Employee.EmployeeName
+                Author = repairCase.Employee.EmployeeName,
+                Photos = initialPhotos // 將初始照片列表賦值給它
             });
-            
-            // 2. 加入所有的後續留言
 
+            // 4. 建立後續留言的歷程 (邏輯微調以適應新的Photos列表)
             timeline.AddRange(repairCase.CaseComments.Select(c => new TimelineEntry
             {
                 Type = TimelineEntry.EntryType.Comment,
                 Timestamp = c.CreatedAt,
                 Content = c.CaseComments,
-                Author = c.Employee.EmployeeName
+                Author = c.Employee.EmployeeName,
+                // 如果留言有關聯照片，就建立一個只有一張照片的列表
+                Photos = c.CasePhoto != null
+                    ? new List<TimelineEntry.PhotoInfo> { new TimelineEntry.PhotoInfo { PhotoData = c.CasePhoto.PhotoData, FileName = c.CasePhoto.FileName } }
+                    : new List<TimelineEntry.PhotoInfo>()
             }));
-            // 3. 加入所有的狀態變更歷史
+
+            // ... (建立狀態變更歷程 和 viewModel 的程式碼維持不變)
             timeline.AddRange(repairCase.CaseHistories.Select(h => new TimelineEntry
             {
                 Type = TimelineEntry.EntryType.StatusChange,
@@ -263,7 +279,6 @@ namespace MachineManagementSystemVer2.Controllers
                 NewStatus = h.NewStatus
             }));
 
-            // b. 加入所有的後續留言
             var statusOptions = new List<string> { "OPEN", "暫置", "CLOSE" };
             var viewModel = new RepairCaseDetailViewModel
             {
@@ -278,7 +293,7 @@ namespace MachineManagementSystemVer2.Controllers
                 CustomerName = repairCase.Plant.Customer.CustomerName, // 取得客戶名稱
                 PlantName = repairCase.Plant.PlantName,
                 DeviceName = repairCase.Device.DeviceModel,
-                CaseTimeline = timeline.OrderByDescending(t => t.Timestamp).ToList(), 
+                CaseTimeline = timeline.OrderByDescending(t => t.Timestamp).ToList(),
                 Photos = repairCase.CasePhotos.OrderByDescending(p => p.UploadedAt).ToList(),
                 StatusList = new SelectList(statusOptions, repairCase.CaseStatus),
                 NewStatus = repairCase.CaseStatus
@@ -322,7 +337,7 @@ namespace MachineManagementSystemVer2.Controllers
         // --- 【新增】整合後的 AJAX 更新 Action ---
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateCase(int caseId, string newStatus, string? newCommentContent, IFormFile? newPhoto)
+        public async Task<IActionResult> UpdateCase(int caseId, string NewStatus, string? newCommentContent, IFormFile? NewPhoto)
         {
             var repairCase = await _context.RepairCases.FindAsync(caseId);
             if (repairCase == null)
@@ -332,24 +347,45 @@ namespace MachineManagementSystemVer2.Controllers
 
             var loggedInUser = _GetLoggedInEmployeeInfo();
             var hasChanges = false;
+            CasePhoto? photo = null; // 先宣告一個 photo 變數
 
-            // 1. 處理狀態變更
-            if (repairCase.CaseStatus != newStatus)
+            // 1. 優先處理照片上傳
+            if (NewPhoto != null && NewPhoto.Length > 0)
+            {
+                byte[] photoData;
+                using (var ms = new MemoryStream())
+                {
+                    await NewPhoto.CopyToAsync(ms);
+                    photoData = ms.ToArray();
+                }
+                photo = new CasePhoto
+                {
+                    CaseId = caseId,
+                    FileName = NewPhoto.FileName,
+                    PhotoData = photoData,
+                    UploadedAt = DateTime.Now
+                };
+                _context.CasePhotos.Add(photo);
+                hasChanges = true;
+            }
+
+            // 2. 處理狀態變更
+            if (repairCase.CaseStatus != NewStatus)
             {
                 var history = new CaseHistory
                 {
                     RepairCaseId = caseId,
                     OldStatus = repairCase.CaseStatus,
-                    NewStatus = newStatus,
+                    NewStatus = NewStatus,
                     ChangedAt = DateTime.Now,
                     EmployeeId = loggedInUser.id
                 };
                 _context.CaseHistories.Add(history);
-                repairCase.CaseStatus = newStatus;
+                repairCase.CaseStatus = NewStatus;
                 hasChanges = true;
             }
 
-            // 2. 處理新增留言
+            // 3. 處理新增留言 (會關聯到剛上傳的照片)
             if (!string.IsNullOrWhiteSpace(newCommentContent))
             {
                 var comment = new CaseComment
@@ -357,29 +393,10 @@ namespace MachineManagementSystemVer2.Controllers
                     CaseId = caseId,
                     CaseComments = newCommentContent,
                     EmployeeId = loggedInUser.id,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now,
+                    CasePhoto = photo // 【關鍵】直接將照片物件關聯給留言
                 };
                 _context.CaseComments.Add(comment);
-                hasChanges = true;
-            }
-
-            // 3. 處理照片上傳
-            if (newPhoto != null && newPhoto.Length > 0)
-            {
-                byte[] photoData;
-                using (var ms = new MemoryStream())
-                {
-                    await newPhoto.CopyToAsync(ms);
-                    photoData = ms.ToArray();
-                }
-                var photo = new CasePhoto
-                {
-                    CaseId = caseId,
-                    FileName = newPhoto.FileName,
-                    PhotoData = photoData,
-                    UploadedAt = DateTime.Now
-                };
-                _context.CasePhotos.Add(photo);
                 hasChanges = true;
             }
 
@@ -391,8 +408,6 @@ namespace MachineManagementSystemVer2.Controllers
 
             return Json(new { success = false, message = "沒有任何變更。" });
         }
-
-        // --- 【新增】刪除功能 ---
 
         // GET: RepairCases/Delete/5
         [Authorize(Roles = "Manager,Admin")] // 只有主管和管理者可以存取
