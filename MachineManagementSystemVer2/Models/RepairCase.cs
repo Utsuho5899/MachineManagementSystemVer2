@@ -46,7 +46,8 @@ namespace MachineManagementSystemVer2.Models
 
         [Required]
         [Display(Name = "處理人員")] // 詞彙更新
-        public int EmployeeId { get; set; }
+        public string EmployeeId { get; set; }
+
         [ForeignKey("EmployeeId")]
         public Employee Employee { get; set; }
 

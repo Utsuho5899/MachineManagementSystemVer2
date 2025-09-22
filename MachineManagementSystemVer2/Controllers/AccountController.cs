@@ -9,17 +9,26 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using MachineManagementSystemVer2.Models;
 
 namespace MachineManagementSystemVer2.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly UserManager<Employee> _userManager;
+        private readonly SignInManager<Employee> _signInManager;
 
-        public AccountController(AppDbContext context)
+        // 【修改】注入密碼雜湊器
+        public AccountController(UserManager<Employee> userManager, SignInManager<Employee> signInManager)
         {
-            _context = context;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
+
+        //public AccountController(AppDbContext context)
+        //{
+        //    _context = context;
+        //}
 
         [AllowAnonymous] 
         public IActionResult Login(string returnUrl = "/")
@@ -39,38 +48,42 @@ namespace MachineManagementSystemVer2.Controllers
         {
             if (ModelState.IsValid)
             {
-             
-                var employee = await _context.Employees
-                    .FirstOrDefaultAsync(e => e.Account == model.Account && e.Password == model.Password);
+                // 第一步：只用帳號找出使用者
+                var user = await _userManager.FindByNameAsync(model.Account);
 
-                if (employee != null)
+                // 第二步：如果使用者存在，就用 UserManager 檢查密碼
+                if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
                 {
-                    // --- 【兩段式保險】第一道防線：檢查員工狀態 ---
-                    if (employee.Status != "在職")
+                    // 第三步：檢查員工狀態
+                    if (user.Status != "在職")
                     {
                         ModelState.AddModelError(string.Empty, "此帳號已被停用。");
                         return View(model);
                     }
 
+                    // 第四步：手動建立包含角色資訊的 Claims
                     var claims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.NameIdentifier, employee.EmployeeId.ToString()),               
-                        new Claim(ClaimTypes.Name, employee.EmployeeName),
-                        new Claim(ClaimTypes.Role, employee.Role)
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                        new Claim(ClaimTypes.Name, user.EmployeeName),
+                        new Claim(ClaimTypes.Role, user.Role) // <-- 將角色資訊加入！
+
                     };
 
-                    
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var claimsIdentity = new ClaimsIdentity(
+                        claims, IdentityConstants.ApplicationScheme);
+
+
                     var authProperties = new AuthenticationProperties
                     {
-                        // 可以設定 Cookie 是否為永久性、過期時間等
-                        IsPersistent = true,
+                        IsPersistent = true // 實現「記住我」的功能
                     };
 
+                    // 第五步：使用包含完整資訊的 Claims 進行登入
                     await HttpContext.SignInAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(claimsIdentity),
-                        authProperties);
+                          IdentityConstants.ApplicationScheme,
+                          new ClaimsPrincipal(claimsIdentity),
+                          authProperties);
 
                     return LocalRedirect(returnUrl);
                 }
@@ -80,51 +93,48 @@ namespace MachineManagementSystemVer2.Controllers
             return View(model);
         }
 
+
         // --- 【新增】修改密碼功能 ---
 
-        [Authorize] // 只有登入的使用者才能存取
-        public IActionResult ChangePassword()
-        {
-            return View();
-        }
-
-        [HttpPost]
         [Authorize]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
-        {
-            if (!ModelState.IsValid)
+            public IActionResult ChangePassword()
             {
+                return View();
+            }
+
+            [HttpPost]
+            [Authorize]
+            [ValidateAntiForgeryToken]
+            public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+            {
+                if (!ModelState.IsValid) return View(model);
+
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null) return NotFound("找不到使用者。");
+
+                // 【修改】使用 UserManager 更改密碼
+                var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+
+                if (result.Succeeded)
+                {
+                    ViewData["SuccessMessage"] = "密碼已成功更新！";
+                    return View(model);
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
                 return View(model);
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var employee = await _context.Employees.FindAsync(int.Parse(userId));
-
-            if (employee == null) return NotFound("找不到使用者。");
-
-            // 【還原】改回直接比對舊的明碼密碼
-            if (employee.Password != model.OldPassword)
+            [HttpPost]
+            [ValidateAntiForgeryToken]
+            public async Task<IActionResult> Logout()
             {
-                ModelState.AddModelError("OldPassword", "目前的密碼不正確。");
-                return View(model);
+                // 【修改】使用 SignInManager 登出
+                await _signInManager.SignOutAsync();
+                return RedirectToAction("Login", "Account");
             }
-
-            // 【還原】直接儲存新的明碼密碼
-            employee.Password = model.NewPassword;
-            _context.Update(employee);
-            await _context.SaveChangesAsync();
-
-            ViewData["SuccessMessage"] = "密碼已成功更新！";
-            return View(model);
         }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login", "Account");
-        }
-    }
 }

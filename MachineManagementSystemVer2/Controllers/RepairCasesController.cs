@@ -25,7 +25,7 @@ namespace MachineManagementSystemVer2.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string sortOrder, string searchStatus, int? searchEmployeeId, DateTime? searchStartDate, DateTime? searchEndDate)
+        public async Task<IActionResult> Index(string sortOrder, string searchStatus, string? searchEmployeeId, DateTime? searchStartDate, DateTime? searchEndDate)
         {
             var viewModel = new RepairCaseIndexViewModel
             {
@@ -49,9 +49,9 @@ namespace MachineManagementSystemVer2.Controllers
 
             var query = _context.RepairCases.AsQueryable();
 
-            if (viewModel.SearchEmployeeId.HasValue)
+            if (!string.IsNullOrEmpty(viewModel.SearchEmployeeId))
             {
-                var empId = viewModel.SearchEmployeeId.Value;
+                var empId = viewModel.SearchEmployeeId;
                 query = query.Where(rc => rc.EmployeeId == empId || rc.CaseComments.Any(cc => cc.EmployeeId == empId));
             }
             if (viewModel.SearchStartDate.HasValue)
@@ -101,18 +101,31 @@ namespace MachineManagementSystemVer2.Controllers
             viewModel.OpenCount = viewModel.TotalCount - viewModel.ClosedCount;
             viewModel.FilteredCases = filteredResults;
 
+            // --- 【修改】判斷是否為 AJAX 請求 ---
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                // 如果是，只回傳表格部分的局部檢視
+                return PartialView("_RepairCasesTablePartial", viewModel);
+            }
+
             return View(viewModel);
         }
 
-        private (int id, string name) _GetLoggedInEmployeeInfo()
+        private (string id, string name) _GetLoggedInEmployeeInfo()
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userName = User.FindFirstValue(ClaimTypes.Name) ?? "未知人員";
-            if (int.TryParse(userIdString, out int userId))
+            // User.FindFirstValue(...) 本身回傳的就是 string，我們不再需要將它轉換成 int
+            var userIdString = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+            var userName = User.FindFirstValue(System.Security.Claims.ClaimTypes.Name) ?? "未知人員";
+
+            if (!string.IsNullOrEmpty(userIdString))
             {
-                return (userId, userName);
+                return (userIdString, userName);
             }
-            return (1, "系統管理員(預設)"); // Fallback for testing
+
+            // 回傳一個預設值，確保 id 是 string
+            // 注意：這裡的 "1" 必須與您 AppDbContext 中種子資料的 Admin User Id 一致
+            // 如果您的 Admin User Id 不是 "1"，請修改此處
+            return ("5", "系統管理員(預設)");
         }
 
         // GET: RepairCases/Create

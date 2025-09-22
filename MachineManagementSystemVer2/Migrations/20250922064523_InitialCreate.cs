@@ -1,0 +1,566 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
+namespace MachineManagementSystemVer2.Migrations
+{
+    /// <inheritdoc />
+    public partial class InitialCreate : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "AspNetRoles",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    EmployeeName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    HireDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EmployeeTitle = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    EmployeeAddress = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    EmployeePhone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
+                    EmergencyContact = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    EmergencyPhone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
+                    Account = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Password = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    Remarks = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Customers",
+                columns: table => new
+                {
+                    CustomerId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CustomerName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CustomerTaxId = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    CustomerAddress = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    CustomerPhone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Customers", x => x.CustomerId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetRoleClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserClaims_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserLogins",
+                columns: table => new
+                {
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserLogins_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserRoles",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserTokens",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Plants",
+                columns: table => new
+                {
+                    PlantId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PlantName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    PlantCode = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: true),
+                    PlantAddress = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    PlantPhone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
+                    CustomerId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Plants", x => x.PlantId);
+                    table.ForeignKey(
+                        name: "FK_Plants_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "CustomerId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Devices",
+                columns: table => new
+                {
+                    DeviceId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SerialNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    PlantId = table.Column<int>(type: "int", nullable: false),
+                    ProductionLine = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: true),
+                    DeviceModel = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Remark = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Devices", x => x.DeviceId);
+                    table.ForeignKey(
+                        name: "FK_Devices_Plants_PlantId",
+                        column: x => x.PlantId,
+                        principalTable: "Plants",
+                        principalColumn: "PlantId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RepairCases",
+                columns: table => new
+                {
+                    RepairCaseId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    CaseStatus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    OccurredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PlantId = table.Column<int>(type: "int", nullable: false),
+                    DeviceId = table.Column<int>(type: "int", nullable: false),
+                    EmployeeId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CustomerContact = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(1500)", maxLength: 1500, nullable: false),
+                    CaseRemark = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CustomerId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RepairCases", x => x.RepairCaseId);
+                    table.ForeignKey(
+                        name: "FK_RepairCases_AspNetUsers_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_RepairCases_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "CustomerId");
+                    table.ForeignKey(
+                        name: "FK_RepairCases_Devices_DeviceId",
+                        column: x => x.DeviceId,
+                        principalTable: "Devices",
+                        principalColumn: "DeviceId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RepairCases_Plants_PlantId",
+                        column: x => x.PlantId,
+                        principalTable: "Plants",
+                        principalColumn: "PlantId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CaseHistories",
+                columns: table => new
+                {
+                    HistoryId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RepairCaseId = table.Column<int>(type: "int", nullable: false),
+                    OldStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    NewStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    ChangedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EmployeeId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CaseHistories", x => x.HistoryId);
+                    table.ForeignKey(
+                        name: "FK_CaseHistories_AspNetUsers_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CaseHistories_RepairCases_RepairCaseId",
+                        column: x => x.RepairCaseId,
+                        principalTable: "RepairCases",
+                        principalColumn: "RepairCaseId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CasePhotos",
+                columns: table => new
+                {
+                    PhotoId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CaseId = table.Column<int>(type: "int", nullable: false),
+                    PhotoData = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CasePhotos", x => x.PhotoId);
+                    table.ForeignKey(
+                        name: "FK_CasePhotos_RepairCases_CaseId",
+                        column: x => x.CaseId,
+                        principalTable: "RepairCases",
+                        principalColumn: "RepairCaseId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CaseComments",
+                columns: table => new
+                {
+                    CommentId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CaseId = table.Column<int>(type: "int", nullable: false),
+                    CaseComments = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EmployeeId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CasePhotoId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CaseComments", x => x.CommentId);
+                    table.ForeignKey(
+                        name: "FK_CaseComments_AspNetUsers_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CaseComments_CasePhotos_CasePhotoId",
+                        column: x => x.CasePhotoId,
+                        principalTable: "CasePhotos",
+                        principalColumn: "PhotoId");
+                    table.ForeignKey(
+                        name: "FK_CaseComments_RepairCases_CaseId",
+                        column: x => x.CaseId,
+                        principalTable: "RepairCases",
+                        principalColumn: "RepairCaseId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "AccessFailedCount", "Account", "ConcurrencyStamp", "Email", "EmailConfirmed", "EmergencyContact", "EmergencyPhone", "EmployeeAddress", "EmployeeId", "EmployeeName", "EmployeePhone", "EmployeeTitle", "HireDate", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "Password", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "Remarks", "Role", "SecurityStamp", "Status", "TwoFactorEnabled", "UserName" },
+                values: new object[,]
+                {
+                    { "1", 0, null, "b24ad0f5-e4b0-4d31-9084-8296a902d8d0", null, true, "王媽媽", "0987654321", "屏東市xxxxxxxxx", 0, "王小明", "0912345678", "現場工程師", new DateTime(2022, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "USER1", null, "AQAAAAIAAYagAAAAEHaISePi5c5r0js6rEv746LIDZZNonnUuHQdJ/xiqlUtIQ44jcIFin6bLVQakCYLmw==", null, false, null, "Engineer", "6a5097dc-c62e-4745-8968-7866ce924ad8", "在職", false, "user1" },
+                    { "2", 0, null, "e9862ab1-8b5e-4d39-a7c6-c5c5cc43d02f", null, true, "李妻", "03-1234567", "新竹市xxxxxx", 0, "李主管", "0952368741", "業務經理", new DateTime(2012, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "MANAGER1", null, "AQAAAAIAAYagAAAAELBxqYphOpmupvM8LU3qTTJE0Dwj8Xptt3KqrriK4T93ClkJCO6s5QUcDPj7flk6vw==", null, false, null, "Manager", "2aca54cb-16b7-4a04-94bc-3a9cd719130d", "在職", false, "manager1" },
+                    { "3", 0, null, "cb04264f-4281-41d1-8a63-4e222ff66628", null, true, "陳媽媽", "0987654321", "高雄市xxxxxxxxx", 0, "陳大華", "0919874585", "現場工程師", new DateTime(2022, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "USER2", null, "AQAAAAIAAYagAAAAEFe9ZV1dS3La+ZFQPQk1Kg5m6LAH8OPKJ7HThN67xesCyrvun1q+ffD1fu/dKmBFXQ==", null, false, null, "Engineer", "3a4d66d2-ee2e-4739-a965-e517c91d8a72", "在職", false, "user2" },
+                    { "4", 0, null, "b81e8e0a-9903-4b0d-94c4-ed60d0116964", null, true, "張嬸", "0987612587", "苗栗市xxxxxxxxx", 0, "張經理", "0987258678", "工程部經理", new DateTime(2020, 9, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "MANAGER2", null, "AQAAAAIAAYagAAAAENss9L3Yr0RQpbxcD5rJgfHfuoMGRa9wTuV73LA9UV0znxlRLqUsA21kfRvaxwY8AQ==", null, false, null, "Manager", "52af3223-b5e3-436e-bf25-db3a6d376088", "在職", false, "manager2" },
+                    { "5", 0, null, "f57484b0-ecc8-476e-b25d-125cb487f7c3", null, true, "工程師", "0987612587", "高雄市xxxxxxxxx", 0, "系統管理員", "0987888888", "系統管理員", new DateTime(2025, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "ADMIN", null, "AQAAAAIAAYagAAAAEMuK4w/jBaCX+mLYldfpi8LtIW2yTilVKWU9fRzQbTwv4SIGw1GtZwoEwZUAZ5kRdA==", null, false, null, "Admin", "1e2e6d1c-7244-49cc-bcf3-e449cb32584a", "在職", false, "admin" },
+                    { "6", 0, null, "092cdefa-eb1e-427f-b29f-075827c69488", null, true, "母", "0933333333", "高雄市", 0, "LJB", "0911111111", "系統管理員", new DateTime(2025, 9, 12, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "ABC", null, "AQAAAAIAAYagAAAAEPTe4HjFrl2IaveayVAZK/kFTEgMTk0LuqtdkP5pv/8tlq61MRUal9QELdLgSG7uMw==", null, false, null, "Admin", "5eb14070-97ab-4f5c-b9f7-d59b5037ea6b", "在職", false, "abc" },
+                    { "7", 0, null, "e1ffd323-65ba-45f2-bdf2-c441b2d2ab7d", null, true, "人資測試", "0925856324", "高雄市oooooooo", 0, "林人資", "0912365852", "人資", new DateTime(2022, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "HR_USER", null, "AQAAAAIAAYagAAAAEKkmGGD8su8hIIEE6WVeMGy7qwHLSQOm6W8UFuLnQUw73cf4wAAB9oRQa6mrD2Qemg==", null, false, null, "HR", "bb1545c8-8554-42a6-bd60-5cda590c9e75", "在職", false, "hr_user" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Customers",
+                columns: new[] { "CustomerId", "CustomerAddress", "CustomerName", "CustomerPhone", "CustomerTaxId" },
+                values: new object[,]
+                {
+                    { 1, "台南市新市區", "T公司", "06-111-2222", "12345678" },
+                    { 2, "台北市", "發哥", "06-111-2233", "11223344" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Plants",
+                columns: new[] { "PlantId", "CustomerId", "PlantAddress", "PlantCode", "PlantName", "PlantPhone" },
+                values: new object[,]
+                {
+                    { 1, 1, "新竹市xoxox", "H1", "新竹廠", "03-1224545" },
+                    { 2, 1, "台南市xoxox", "N1", "台南廠", "06-6548452" },
+                    { 3, 2, "新竹縣xoxox", "RC1", "竹科研發中心", "03-2116555" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Devices",
+                columns: new[] { "DeviceId", "DeviceModel", "PlantId", "ProductionLine", "Remark", "SerialNumber" },
+                values: new object[,]
+                {
+                    { 1, "NXE3400", 1, "H1#1", null, "20240901-001" },
+                    { 2, "NXE3400", 2, "N1#1", null, "20240901-002" },
+                    { 3, "ASM9000", 3, "RC1#1", null, "20240901-010" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "RepairCases",
+                columns: new[] { "RepairCaseId", "CaseRemark", "CaseStatus", "CustomerContact", "CustomerId", "Description", "DeviceId", "EmployeeId", "EndTime", "OccurredAt", "PlantId", "StartTime", "Title" },
+                values: new object[,]
+                {
+                    { 1, null, "OPEN", null, null, "客戶反應光刻機曝光後晶圓良率降低，需要檢查光源模組", 1, "1", null, new DateTime(2024, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, null, "光刻機光源模組檢查" },
+                    { 2, null, "暫置", null, null, "蝕刻腔體真空無法維持，懷疑是真空幫浦老化", 2, "2", null, new DateTime(2024, 9, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, null, "蝕刻腔體真空度異常" },
+                    { 3, null, "CLOSE", null, null, "自動測試程式頻繁跳出錯誤代碼，需要檢查控制模組", 3, "3", null, new DateTime(2024, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, null, "自動測試程式錯誤" }
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetRoleClaims_RoleId",
+                table: "AspNetRoleClaims",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "RoleNameIndex",
+                table: "AspNetRoles",
+                column: "NormalizedName",
+                unique: true,
+                filter: "[NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserClaims_UserId",
+                table: "AspNetUserClaims",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserLogins_UserId",
+                table: "AspNetUserLogins",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserRoles_RoleId",
+                table: "AspNetUserRoles",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "EmailIndex",
+                table: "AspNetUsers",
+                column: "NormalizedEmail");
+
+            migrationBuilder.CreateIndex(
+                name: "UserNameIndex",
+                table: "AspNetUsers",
+                column: "NormalizedUserName",
+                unique: true,
+                filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CaseComments_CaseId",
+                table: "CaseComments",
+                column: "CaseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CaseComments_CasePhotoId",
+                table: "CaseComments",
+                column: "CasePhotoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CaseComments_EmployeeId",
+                table: "CaseComments",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CaseHistories_EmployeeId",
+                table: "CaseHistories",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CaseHistories_RepairCaseId",
+                table: "CaseHistories",
+                column: "RepairCaseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CasePhotos_CaseId",
+                table: "CasePhotos",
+                column: "CaseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Devices_PlantId",
+                table: "Devices",
+                column: "PlantId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Plants_CustomerId",
+                table: "Plants",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RepairCases_CustomerId",
+                table: "RepairCases",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RepairCases_DeviceId",
+                table: "RepairCases",
+                column: "DeviceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RepairCases_EmployeeId",
+                table: "RepairCases",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RepairCases_PlantId",
+                table: "RepairCases",
+                column: "PlantId");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "AspNetRoleClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserLogins");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserRoles");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "CaseComments");
+
+            migrationBuilder.DropTable(
+                name: "CaseHistories");
+
+            migrationBuilder.DropTable(
+                name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "CasePhotos");
+
+            migrationBuilder.DropTable(
+                name: "RepairCases");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Devices");
+
+            migrationBuilder.DropTable(
+                name: "Plants");
+
+            migrationBuilder.DropTable(
+                name: "Customers");
+        }
+    }
+}

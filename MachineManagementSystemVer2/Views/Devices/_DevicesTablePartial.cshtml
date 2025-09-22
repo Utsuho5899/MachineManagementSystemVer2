@@ -1,0 +1,55 @@
+﻿@model MachineManagementSystemVer2.ViewModels.DeviceIndexViewModel
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>
+                <a class="sort-link" asp-action="Index" asp-route-sortOrder="@ViewData["CustomerSortParm"]" asp-all-route-data="@Model.ToRouteDictionary()">
+                    客戶名稱
+                    <span class="arrow @(string.IsNullOrEmpty(ViewData["CurrentSort"] as string) || (ViewData["CurrentSort"]?.ToString().Contains("customer_") ?? false) ? "active" : "")">
+                        <i class="fas @(ViewData["CurrentSort"] as string == "customer_desc" ? "fa-sort-down" : "fa-sort-up")"></i>
+                    </span>
+                </a>
+            </th>
+            <th>
+                <a class="sort-link" asp-action="Index" asp-route-sortOrder="@ViewData["PlantSortParm"]" asp-all-route-data="@Model.ToRouteDictionary()">
+                    廠區名稱
+                    <span class="arrow @(ViewData["CurrentSort"]?.ToString().Contains("plant_") ?? false ? "active" : "")">
+                        <i class="fas @(ViewData["CurrentSort"] as string == "plant_asc" ? "fa-sort-up" : (ViewData["CurrentSort"] as string == "plant_desc" ? "fa-sort-down" : "fa-sort"))"></i>
+                    </span>
+                </a>
+            </th>
+            <th>
+                <a class="sort-link" asp-action="Index" asp-route-sortOrder="@ViewData["ModelSortParm"]" asp-all-route-data="@Model.ToRouteDictionary()">
+                    設備機型
+                    <span class="arrow @(ViewData["CurrentSort"]?.ToString().Contains("model_") ?? false ? "active" : "")">
+                        <i class="fas @(ViewData["CurrentSort"] as string == "model_asc" ? "fa-sort-up" : (ViewData["CurrentSort"] as string == "model_desc" ? "fa-sort-down" : "fa-sort"))"></i>
+                    </span>
+                </a>
+            </th>
+            <th>出廠序號</th>
+            <th>客戶產線代稱</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Devices)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Plant.Customer.CustomerName)</td>
+                <td>@Html.DisplayFor(modelItem => item.Plant.PlantName)</td>
+                <td>@Html.DisplayFor(modelItem => item.DeviceModel)</td>
+                <td>@Html.DisplayFor(modelItem => item.SerialNumber)</td>
+                <td>@Html.DisplayFor(modelItem => item.ProductionLine)</td>
+                <td>
+                    <a asp-controller="Devices" asp-action="Details" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-info">詳情</a>
+                    <a asp-controller="Devices" asp-action="Edit" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-secondary">編輯</a>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Devices" asp-action="Delete" asp-route-id="@item.DeviceId" class="btn btn-sm btn-outline-danger">刪除</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

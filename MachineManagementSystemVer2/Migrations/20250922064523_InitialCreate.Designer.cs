@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MachineManagementSystemVer2.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250918013119_AddPhotoRelationToComment")]
-    partial class AddPhotoRelationToComment
+    [Migration("20250922064523_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "8.0.20")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -47,8 +47,9 @@ namespace MachineManagementSystemVer2.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("CommentId");
 
@@ -72,8 +73,9 @@ namespace MachineManagementSystemVer2.Migrations
                     b.Property<DateTime>("ChangedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("NewStatus")
                         .IsRequired()
@@ -242,15 +244,26 @@ namespace MachineManagementSystemVer2.Migrations
 
             modelBuilder.Entity("MachineManagementSystemVer2.Models.Employee", b =>
                 {
-                    b.Property<int>("EmployeeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeeId"));
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
 
                     b.Property<string>("Account")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
 
                     b.Property<string>("EmergencyContact")
                         .IsRequired()
@@ -266,6 +279,9 @@ namespace MachineManagementSystemVer2.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("EmployeeName")
                         .IsRequired()
@@ -285,9 +301,32 @@ namespace MachineManagementSystemVer2.Migrations
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<string>("Password")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(100)
@@ -298,120 +337,201 @@ namespace MachineManagementSystemVer2.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.HasKey("EmployeeId");
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
 
-                    b.ToTable("Employees");
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
 
                     b.HasData(
                         new
                         {
-                            EmployeeId = 1,
-                            Account = "user1",
+                            Id = "1",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "b24ad0f5-e4b0-4d31-9084-8296a902d8d0",
+                            EmailConfirmed = true,
                             EmergencyContact = "王媽媽",
                             EmergencyPhone = "0987654321",
                             EmployeeAddress = "屏東市xxxxxxxxx",
+                            EmployeeId = 0,
                             EmployeeName = "王小明",
                             EmployeePhone = "0912345678",
                             EmployeeTitle = "現場工程師",
                             HireDate = new DateTime(2022, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Password = "password",
+                            LockoutEnabled = false,
+                            NormalizedUserName = "USER1",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHaISePi5c5r0js6rEv746LIDZZNonnUuHQdJ/xiqlUtIQ44jcIFin6bLVQakCYLmw==",
+                            PhoneNumberConfirmed = false,
                             Role = "Engineer",
-                            Status = "在職"
+                            SecurityStamp = "6a5097dc-c62e-4745-8968-7866ce924ad8",
+                            Status = "在職",
+                            TwoFactorEnabled = false,
+                            UserName = "user1"
                         },
                         new
                         {
-                            EmployeeId = 2,
-                            Account = "manager1",
+                            Id = "2",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "e9862ab1-8b5e-4d39-a7c6-c5c5cc43d02f",
+                            EmailConfirmed = true,
                             EmergencyContact = "李妻",
                             EmergencyPhone = "03-1234567",
                             EmployeeAddress = "新竹市xxxxxx",
+                            EmployeeId = 0,
                             EmployeeName = "李主管",
                             EmployeePhone = "0952368741",
                             EmployeeTitle = "業務經理",
                             HireDate = new DateTime(2012, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Password = "password",
+                            LockoutEnabled = false,
+                            NormalizedUserName = "MANAGER1",
+                            PasswordHash = "AQAAAAIAAYagAAAAELBxqYphOpmupvM8LU3qTTJE0Dwj8Xptt3KqrriK4T93ClkJCO6s5QUcDPj7flk6vw==",
+                            PhoneNumberConfirmed = false,
                             Role = "Manager",
-                            Status = "在職"
+                            SecurityStamp = "2aca54cb-16b7-4a04-94bc-3a9cd719130d",
+                            Status = "在職",
+                            TwoFactorEnabled = false,
+                            UserName = "manager1"
                         },
                         new
                         {
-                            EmployeeId = 3,
-                            Account = "user2",
+                            Id = "3",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "cb04264f-4281-41d1-8a63-4e222ff66628",
+                            EmailConfirmed = true,
                             EmergencyContact = "陳媽媽",
                             EmergencyPhone = "0987654321",
                             EmployeeAddress = "高雄市xxxxxxxxx",
+                            EmployeeId = 0,
                             EmployeeName = "陳大華",
                             EmployeePhone = "0919874585",
                             EmployeeTitle = "現場工程師",
                             HireDate = new DateTime(2022, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Password = "password",
+                            LockoutEnabled = false,
+                            NormalizedUserName = "USER2",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFe9ZV1dS3La+ZFQPQk1Kg5m6LAH8OPKJ7HThN67xesCyrvun1q+ffD1fu/dKmBFXQ==",
+                            PhoneNumberConfirmed = false,
                             Role = "Engineer",
-                            Status = "在職"
+                            SecurityStamp = "3a4d66d2-ee2e-4739-a965-e517c91d8a72",
+                            Status = "在職",
+                            TwoFactorEnabled = false,
+                            UserName = "user2"
                         },
                         new
                         {
-                            EmployeeId = 4,
-                            Account = "manager2",
+                            Id = "4",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "b81e8e0a-9903-4b0d-94c4-ed60d0116964",
+                            EmailConfirmed = true,
                             EmergencyContact = "張嬸",
                             EmergencyPhone = "0987612587",
                             EmployeeAddress = "苗栗市xxxxxxxxx",
+                            EmployeeId = 0,
                             EmployeeName = "張經理",
                             EmployeePhone = "0987258678",
                             EmployeeTitle = "工程部經理",
                             HireDate = new DateTime(2020, 9, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Password = "password",
+                            LockoutEnabled = false,
+                            NormalizedUserName = "MANAGER2",
+                            PasswordHash = "AQAAAAIAAYagAAAAENss9L3Yr0RQpbxcD5rJgfHfuoMGRa9wTuV73LA9UV0znxlRLqUsA21kfRvaxwY8AQ==",
+                            PhoneNumberConfirmed = false,
                             Role = "Manager",
-                            Status = "在職"
+                            SecurityStamp = "52af3223-b5e3-436e-bf25-db3a6d376088",
+                            Status = "在職",
+                            TwoFactorEnabled = false,
+                            UserName = "manager2"
                         },
                         new
                         {
-                            EmployeeId = 5,
-                            Account = "admin",
+                            Id = "5",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "f57484b0-ecc8-476e-b25d-125cb487f7c3",
+                            EmailConfirmed = true,
                             EmergencyContact = "工程師",
                             EmergencyPhone = "0987612587",
                             EmployeeAddress = "高雄市xxxxxxxxx",
+                            EmployeeId = 0,
                             EmployeeName = "系統管理員",
                             EmployeePhone = "0987888888",
                             EmployeeTitle = "系統管理員",
                             HireDate = new DateTime(2025, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Password = "password",
+                            LockoutEnabled = false,
+                            NormalizedUserName = "ADMIN",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMuK4w/jBaCX+mLYldfpi8LtIW2yTilVKWU9fRzQbTwv4SIGw1GtZwoEwZUAZ5kRdA==",
+                            PhoneNumberConfirmed = false,
                             Role = "Admin",
-                            Status = "在職"
+                            SecurityStamp = "1e2e6d1c-7244-49cc-bcf3-e449cb32584a",
+                            Status = "在職",
+                            TwoFactorEnabled = false,
+                            UserName = "admin"
                         },
                         new
                         {
-                            EmployeeId = 6,
-                            Account = "abc",
+                            Id = "6",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "092cdefa-eb1e-427f-b29f-075827c69488",
+                            EmailConfirmed = true,
                             EmergencyContact = "母",
                             EmergencyPhone = "0933333333",
                             EmployeeAddress = "高雄市",
+                            EmployeeId = 0,
                             EmployeeName = "LJB",
                             EmployeePhone = "0911111111",
                             EmployeeTitle = "系統管理員",
                             HireDate = new DateTime(2025, 9, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Password = "123456",
+                            LockoutEnabled = false,
+                            NormalizedUserName = "ABC",
+                            PasswordHash = "AQAAAAIAAYagAAAAEPTe4HjFrl2IaveayVAZK/kFTEgMTk0LuqtdkP5pv/8tlq61MRUal9QELdLgSG7uMw==",
+                            PhoneNumberConfirmed = false,
                             Role = "Admin",
-                            Status = "在職"
+                            SecurityStamp = "5eb14070-97ab-4f5c-b9f7-d59b5037ea6b",
+                            Status = "在職",
+                            TwoFactorEnabled = false,
+                            UserName = "abc"
                         },
                         new
                         {
-                            EmployeeId = 7,
-                            Account = "hr_user",
+                            Id = "7",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "e1ffd323-65ba-45f2-bdf2-c441b2d2ab7d",
+                            EmailConfirmed = true,
                             EmergencyContact = "人資測試",
                             EmergencyPhone = "0925856324",
                             EmployeeAddress = "高雄市oooooooo",
+                            EmployeeId = 0,
                             EmployeeName = "林人資",
                             EmployeePhone = "0912365852",
                             EmployeeTitle = "人資",
                             HireDate = new DateTime(2022, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Password = "password",
+                            LockoutEnabled = false,
+                            NormalizedUserName = "HR_USER",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKkmGGD8su8hIIEE6WVeMGy7qwHLSQOm6W8UFuLnQUw73cf4wAAB9oRQa6mrD2Qemg==",
+                            PhoneNumberConfirmed = false,
                             Role = "HR",
-                            Status = "在職"
+                            SecurityStamp = "bb1545c8-8554-42a6-bd60-5cda590c9e75",
+                            Status = "在職",
+                            TwoFactorEnabled = false,
+                            UserName = "hr_user"
                         });
                 });
 
@@ -513,8 +633,9 @@ namespace MachineManagementSystemVer2.Migrations
                     b.Property<int>("DeviceId")
                         .HasColumnType("int");
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime2");
@@ -552,7 +673,7 @@ namespace MachineManagementSystemVer2.Migrations
                             CaseStatus = "OPEN",
                             Description = "客戶反應光刻機曝光後晶圓良率降低，需要檢查光源模組",
                             DeviceId = 1,
-                            EmployeeId = 1,
+                            EmployeeId = "1",
                             OccurredAt = new DateTime(2024, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             PlantId = 1,
                             Title = "光刻機光源模組檢查"
@@ -563,7 +684,7 @@ namespace MachineManagementSystemVer2.Migrations
                             CaseStatus = "暫置",
                             Description = "蝕刻腔體真空無法維持，懷疑是真空幫浦老化",
                             DeviceId = 2,
-                            EmployeeId = 2,
+                            EmployeeId = "2",
                             OccurredAt = new DateTime(2024, 9, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             PlantId = 2,
                             Title = "蝕刻腔體真空度異常"
@@ -574,11 +695,144 @@ namespace MachineManagementSystemVer2.Migrations
                             CaseStatus = "CLOSE",
                             Description = "自動測試程式頻繁跳出錯誤代碼，需要檢查控制模組",
                             DeviceId = 3,
-                            EmployeeId = 3,
+                            EmployeeId = "3",
                             OccurredAt = new DateTime(2024, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             PlantId = 3,
                             Title = "自動測試程式錯誤"
                         });
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
                 });
 
             modelBuilder.Entity("MachineManagementSystemVer2.Models.CaseComment", b =>
@@ -687,6 +941,57 @@ namespace MachineManagementSystemVer2.Migrations
                     b.Navigation("Employee");
 
                     b.Navigation("Plant");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.HasOne("MachineManagementSystemVer2.Models.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.HasOne("MachineManagementSystemVer2.Models.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MachineManagementSystemVer2.Models.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.HasOne("MachineManagementSystemVer2.Models.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MachineManagementSystemVer2.Models.Customer", b =>

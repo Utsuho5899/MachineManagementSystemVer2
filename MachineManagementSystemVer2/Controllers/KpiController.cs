@@ -21,7 +21,7 @@ namespace MachineManagementSystemVer2.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string sortOrder, string searchStatus, int? searchEmployeeId, DateTime? searchStartDate, DateTime? searchEndDate)
+        public async Task<IActionResult> Index(string sortOrder, string searchStatus, string? searchEmployeeId, DateTime? searchStartDate, DateTime? searchEndDate)
         {
             var model = new KpiViewModel
             {
@@ -31,7 +31,7 @@ namespace MachineManagementSystemVer2.Controllers
                 SearchEndDate = searchEndDate
             };
 
-            model.EmployeeList = new SelectList(await _context.Employees.OrderBy(e => e.EmployeeName).ToListAsync(), "EmployeeId", "EmployeeName", model.SearchEmployeeId);
+            model.EmployeeList = new SelectList(await _context.Users.OrderBy(e => e.EmployeeName).ToListAsync(), "Id", "EmployeeName", model.SearchEmployeeId);
             model.StatusList = new SelectList(new List<string> { "OPEN", "暫置", "CLOSE" }, model.SearchStatus);
 
             ViewData["CurrentSort"] = sortOrder;
@@ -45,9 +45,9 @@ namespace MachineManagementSystemVer2.Controllers
 
             var query = _context.RepairCases.AsQueryable();
 
-            if (model.SearchEmployeeId.HasValue)
+            if (!string.IsNullOrEmpty(model.SearchEmployeeId))
             {
-                var empId = model.SearchEmployeeId.Value;
+                var empId = model.SearchEmployeeId;
                 query = query.Where(rc => rc.EmployeeId == empId || rc.CaseComments.Any(cc => cc.EmployeeId == empId));
             }
             if (model.SearchStartDate.HasValue)
@@ -99,6 +99,14 @@ namespace MachineManagementSystemVer2.Controllers
             model.OpenCount = model.TotalCount - model.ClosedCount;
             model.FilteredCases = filteredResults;
 
+            // --- 【修改】判斷是否為 AJAX 請求 ---
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                // 如果是，只回傳表格部分的局部檢視
+                return PartialView("_KpiTablePartial", model);
+            }
+
+            // 如果是正常的頁面載入，回傳完整頁面
             return View(model);
         }
     }

@@ -23,7 +23,7 @@ namespace MachineManagementSystemVer2.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         [Required]
-        public int EmployeeId { get; set; }
+        public string EmployeeId { get; set; }
         [ForeignKey("EmployeeId")] // 修正 ForeignKey 指向正確的屬性
         public Employee Employee { get; set; }
 

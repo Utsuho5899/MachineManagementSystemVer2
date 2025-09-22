@@ -6,16 +6,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.AspNetCore.Identity;
 
 namespace MachineManagementSystemVer2.Controllers
 {
     [Authorize(Roles = "HR,Admin")]
     public class EmployeesController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly UserManager<Employee> _userManager; // 【修改】改用 UserManager
+        private readonly AppDbContext _context; // 保留 DbContext 用於非使用者相關查詢
 
-        public EmployeesController(AppDbContext context)
+        // 【修改】注入密碼雜湊器
+        public EmployeesController(UserManager<Employee> userManager, AppDbContext context)
         {
+            _userManager = userManager;
             _context = context;
         }
 
@@ -59,26 +63,34 @@ namespace MachineManagementSystemVer2.Controllers
                     EmergencyContact = viewModel.EmergencyContact,
                     EmergencyPhone = viewModel.EmergencyPhone,
                     Account = viewModel.Account,
-                    Password = viewModel.Password,
+                    //Password = viewModel.Password,
                     Remarks = viewModel.Remarks
                 };
-                _context.Add(employee);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                // 【修改】使用 UserManager 建立使用者，它會自動處理密碼雜湊
+                var result = await _userManager.CreateAsync(employee, viewModel.Password);
+
+                if (result.Succeeded)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
             return View(viewModel);
         }
-
         // GET: Employees/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(string id) // 【修改】Id 現在是 string
         {
             if (id == null) return NotFound();
-            var employee = await _context.Employees.FindAsync(id);
+
+            var employee = await _userManager.FindByIdAsync(id);
             if (employee == null) return NotFound();
 
             var viewModel = new EmployeeEditViewModel
             {
-                EmployeeId = employee.EmployeeId,
+                EmployeeId = employee.Id, // 【修改】對應 IdentityUser 的 Id
                 EmployeeName = employee.EmployeeName,
                 HireDate = employee.HireDate,
                 EmployeeTitle = employee.EmployeeTitle,
@@ -86,7 +98,7 @@ namespace MachineManagementSystemVer2.Controllers
                 EmployeePhone = employee.EmployeePhone,
                 EmergencyContact = employee.EmergencyContact,
                 EmergencyPhone = employee.EmergencyPhone,
-                Account = employee.Account,
+                Account = employee.UserName, // 【修改】對應 UserName
                 Remarks = employee.Remarks,
                 Role = employee.Role,
                 Status = employee.Status
@@ -97,47 +109,75 @@ namespace MachineManagementSystemVer2.Controllers
         // POST: Employees/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, EmployeeEditViewModel viewModel)
+        public async Task<IActionResult> Edit(string id, EmployeeEditViewModel viewModel)
         {
             if (id != viewModel.EmployeeId) return NotFound();
 
-            var employeeToUpdate = await _context.Employees.FindAsync(id);
-            if (employeeToUpdate == null) return NotFound();
-
-            if (!User.IsInRole("Admin") && !User.IsInRole("HR"))
-            {
-                viewModel.Status = employeeToUpdate.Status;
-            }
-
             if (ModelState.IsValid)
             {
-                try
-                {
-                    employeeToUpdate.EmployeeName = viewModel.EmployeeName;
-                    employeeToUpdate.HireDate = viewModel.HireDate;
-                    employeeToUpdate.EmployeeTitle = viewModel.EmployeeTitle;
-                    employeeToUpdate.EmployeeAddress = viewModel.EmployeeAddress;
-                    employeeToUpdate.EmployeePhone = viewModel.EmployeePhone;
-                    employeeToUpdate.EmergencyContact = viewModel.EmergencyContact;
-                    employeeToUpdate.EmergencyPhone = viewModel.EmergencyPhone;
-                    employeeToUpdate.Account = viewModel.Account;
-                    employeeToUpdate.Remarks = viewModel.Remarks;
-                    employeeToUpdate.Role = viewModel.Role;
-                    employeeToUpdate.Status = viewModel.Status;
+                var userToUpdate = await _userManager.FindByIdAsync(id);
+                if (userToUpdate == null) return NotFound("找不到指定的使用者。");
 
-                    if (!string.IsNullOrEmpty(viewModel.NewPassword))
+                // 更新自訂的員工資料
+                userToUpdate.EmployeeName = viewModel.EmployeeName;
+                userToUpdate.HireDate = viewModel.HireDate;
+                userToUpdate.EmployeeTitle = viewModel.EmployeeTitle;
+                userToUpdate.EmployeeAddress = viewModel.EmployeeAddress;
+                userToUpdate.EmployeePhone = viewModel.EmployeePhone;
+                userToUpdate.EmergencyContact = viewModel.EmergencyContact;
+                userToUpdate.EmergencyPhone = viewModel.EmergencyPhone;
+                userToUpdate.UserName = viewModel.Account; // 【修改】更新 UserName
+                userToUpdate.Remarks = viewModel.Remarks;
+                userToUpdate.Role = viewModel.Role;
+                userToUpdate.Status = viewModel.Status;
+
+                // 使用 UserManager 更新基本資料
+                var result = await _userManager.UpdateAsync(userToUpdate);
+
+                if (!result.Succeeded)
+                {
+                    // 如果更新失敗，將錯誤訊息加到 ModelState
+                    foreach (var error in result.Errors)
                     {
-                        employeeToUpdate.Password = viewModel.NewPassword;
+                        ModelState.AddModelError(string.Empty, error.Description);
                     }
+                    return View(viewModel);
+                }
 
-                    _context.Update(employeeToUpdate);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
+                // 如果提供了新密碼，則單獨更新密碼
+                if (!string.IsNullOrEmpty(viewModel.NewPassword))
                 {
-                    if (!EmployeeExists(viewModel.EmployeeId)) return NotFound();
-                    else throw;
+                    // 移除舊密碼，再設定新密碼
+                    var removePasswordResult = await _userManager.RemovePasswordAsync(userToUpdate);
+                    if (removePasswordResult.Succeeded)
+                    {
+                        var addPasswordResult = await _userManager.AddPasswordAsync(userToUpdate, viewModel.NewPassword);
+                        if (!addPasswordResult.Succeeded)
+                        {
+                            // 如果新增密碼失敗，將錯誤訊息加到 ModelState
+                            foreach (var error in addPasswordResult.Errors)
+                            {
+                                ModelState.AddModelError("NewPassword", error.Description);
+                            }
+                            return View(viewModel);
+                        }
+                    }
+                    else
+                    {
+                        // 如果移除舊密碼失敗 (通常發生在使用者是用外部登入，本來就沒密碼)
+                        // 也可以直接新增密碼
+                        var addPasswordResult = await _userManager.AddPasswordAsync(userToUpdate, viewModel.NewPassword);
+                        if (!addPasswordResult.Succeeded)
+                        {
+                            foreach (var error in addPasswordResult.Errors)
+                            {
+                                ModelState.AddModelError("NewPassword", error.Description);
+                            }
+                            return View(viewModel);
+                        }
+                    }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
             return View(viewModel);

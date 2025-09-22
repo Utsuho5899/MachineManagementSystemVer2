@@ -1,9 +1,11 @@
 ﻿using MachineManagementSystemVer2.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace MachineManagementSystemVer2.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<Employee>
     {
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Plant> Plants { get; set; }
@@ -19,6 +21,10 @@ namespace MachineManagementSystemVer2.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+           
+            // 【修改】預先算好並寫死雜湊值
+            var hasher = new PasswordHasher<Employee>();
 
 
             // Customers 客戶
@@ -100,44 +106,140 @@ namespace MachineManagementSystemVer2.Data
                 }
             );
             // --- 種子資料 (Seed Data) ---
-            modelBuilder.Entity<Employee>().HasData(
-                new Employee { EmployeeId = 1, EmployeeName = "王小明", HireDate = new DateTime(2022, 1, 1), EmployeeTitle = "現場工程師", EmployeeAddress = "屏東市xxxxxxxxx", EmployeePhone = "0912345678", EmergencyContact = "王媽媽", EmergencyPhone = "0987654321", Status = "在職", Role = "Engineer", Account = "user1", Password = "password" },
-                new Employee { EmployeeId = 2, EmployeeName = "李主管", HireDate = new DateTime(2012, 1, 1), EmployeeTitle = "業務經理", EmployeeAddress = "新竹市xxxxxx", EmployeePhone = "0952368741", EmergencyContact = "李妻", EmergencyPhone = "03-1234567", Status = "在職", Role = "Manager", Account = "manager1", Password = "password" },
-                new Employee { EmployeeId = 3, EmployeeName = "陳大華", HireDate = new DateTime(2022, 6, 1), EmployeeTitle = "現場工程師", EmployeeAddress = "高雄市xxxxxxxxx", EmployeePhone = "0919874585", EmergencyContact = "陳媽媽", EmergencyPhone = "0987654321", Status = "在職", Role = "Engineer", Account = "user2", Password = "password" },
-                new Employee { EmployeeId = 4, EmployeeName = "張經理", HireDate = new DateTime(2020, 9, 8), EmployeeTitle = "工程部經理", EmployeeAddress = "苗栗市xxxxxxxxx", EmployeePhone = "0987258678", EmergencyContact = "張嬸", EmergencyPhone = "0987612587", Status = "在職", Role = "Manager", Account = "manager2", Password = "password" },
-                new Employee { EmployeeId = 5, EmployeeName = "系統管理員", HireDate = new DateTime(2025, 9, 5), EmployeeTitle = "系統管理員", EmployeeAddress = "高雄市xxxxxxxxx", EmployeePhone = "0987888888", EmergencyContact = "工程師", EmergencyPhone = "0987612587", Status = "在職", Role = "Admin", Account = "admin", Password = "password" },
-                // 【新增】將資料庫中已存在的 ID=6 的員工加入到種子資料中
-                new Employee
-                {
-                    EmployeeId = 6,
-                    EmployeeName = "LJB",
-                    Role = "Admin",
-                    Status = "在職",
-                    HireDate = new DateTime(2025, 09, 12),
-                    EmployeeTitle = "系統管理員",
-                    EmployeeAddress = "高雄市",
-                    EmployeePhone = "0911111111",
-                    EmergencyContact = "母",
-                    EmergencyPhone = "0933333333",
-                    Account = "abc",
-                    Password = "123456"
-                },
-                new Employee
-                {
-                    EmployeeId = 7,
-                    EmployeeName = "林人資",
-                    Role = "HR",
-                    Status = "在職",
-                    HireDate = new DateTime(2022, 09, 05),
-                    EmployeeTitle = "人資",
-                    EmployeeAddress = "高雄市oooooooo",
-                    EmployeePhone = "0912365852",
-                    EmergencyContact = "人資測試",
-                    EmergencyPhone = "0925856324",
-                    Account = "hr_user",
-                    Password = "password"
-                }
-            );
+            // 建立要植入的使用者列表
+            var employeesToSeed = new List<Employee>
+    {
+        new Employee
+        {
+            Id = "1",
+            EmployeeName = "王小明",
+            HireDate = new DateTime(2022, 1, 1),
+            EmployeeTitle = "現場工程師",
+            EmployeeAddress = "屏東市xxxxxxxxx",
+            EmployeePhone = "0912345678",
+            EmergencyContact = "王媽媽",
+            EmergencyPhone = "0987654321",
+            Status = "在職",
+            Role = "Engineer",
+            UserName = "user1",
+            NormalizedUserName = "USER1",
+            EmailConfirmed = true, // 預設確認 Email
+            SecurityStamp = Guid.NewGuid().ToString("D") // 產生安全戳記
+        },
+        new Employee
+        {
+            Id = "2",
+            EmployeeName = "李主管",
+            HireDate = new DateTime(2012, 1, 1),
+            EmployeeTitle = "業務經理",
+            EmployeeAddress = "新竹市xxxxxx",
+            EmployeePhone = "0952368741",
+            EmergencyContact = "李妻",
+            EmergencyPhone = "03-1234567",
+            Status = "在職",
+            Role = "Manager",
+            UserName = "manager1",
+            NormalizedUserName = "MANAGER1",
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString("D")
+        },
+        new Employee
+        {
+            Id = "3",
+            EmployeeName = "陳大華",
+            HireDate = new DateTime(2022, 6, 1),
+            EmployeeTitle = "現場工程師",
+            EmployeeAddress = "高雄市xxxxxxxxx",
+            EmployeePhone = "0919874585",
+            EmergencyContact = "陳媽媽",
+            EmergencyPhone = "0987654321",
+            Status = "在職",
+            Role = "Engineer",
+            UserName = "user2",
+            NormalizedUserName = "USER2",
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString("D")
+        },
+        new Employee
+        {
+            Id = "4",
+            EmployeeName = "張經理",
+            HireDate = new DateTime(2020, 9, 8),
+            EmployeeTitle = "工程部經理",
+            EmployeeAddress = "苗栗市xxxxxxxxx",
+            EmployeePhone = "0987258678",
+            EmergencyContact = "張嬸",
+            EmergencyPhone = "0987612587",
+            Status = "在職",
+            Role = "Manager",
+            UserName = "manager2",
+            NormalizedUserName = "MANAGER2",
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString("D")
+        },
+        new Employee
+        {
+            Id = "5",
+            EmployeeName = "系統管理員",
+            HireDate = new DateTime(2025, 9, 5),
+            EmployeeTitle = "系統管理員",
+            EmployeeAddress = "高雄市xxxxxxxxx",
+            EmployeePhone = "0987888888",
+            EmergencyContact = "工程師",
+            EmergencyPhone = "0987612587",
+            Status = "在職",
+            Role = "Admin",
+            UserName = "admin",
+            NormalizedUserName = "ADMIN",
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString("D")
+        },
+        new Employee
+        {
+            Id = "6",
+            EmployeeName = "LJB",
+            Role = "Admin",
+            Status = "在職",
+            HireDate = new DateTime(2025, 9, 12),
+            EmployeeTitle = "系統管理員",
+            EmployeeAddress = "高雄市",
+            EmployeePhone = "0911111111",
+            EmergencyContact = "母",
+            EmergencyPhone = "0933333333",
+            UserName = "abc",
+            NormalizedUserName = "ABC",
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString("D")
+        },
+        new Employee
+        {
+            Id = "7",
+            EmployeeName = "林人資",
+            Role = "HR",
+            Status = "在職",
+            HireDate = new DateTime(2022, 9, 5),
+            EmployeeTitle = "人資",
+            EmployeeAddress = "高雄市oooooooo",
+            EmployeePhone = "0912365852",
+            EmergencyContact = "人資測試",
+            EmergencyPhone = "0925856324",
+            UserName = "hr_user",
+            NormalizedUserName = "HR_USER",
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString("D")
+        }
+    };
+
+            // 為每位使用者設定雜湊密碼
+            employeesToSeed[0].PasswordHash = hasher.HashPassword(employeesToSeed[0], "password");
+            employeesToSeed[1].PasswordHash = hasher.HashPassword(employeesToSeed[1], "password");
+            employeesToSeed[2].PasswordHash = hasher.HashPassword(employeesToSeed[2], "password");
+            employeesToSeed[3].PasswordHash = hasher.HashPassword(employeesToSeed[3], "password");
+            employeesToSeed[4].PasswordHash = hasher.HashPassword(employeesToSeed[4], "password");
+            employeesToSeed[5].PasswordHash = hasher.HashPassword(employeesToSeed[5], "123456");
+            employeesToSeed[6].PasswordHash = hasher.HashPassword(employeesToSeed[6], "password");
+
+            modelBuilder.Entity<Employee>().HasData(employeesToSeed);
 
             // RepairCases 維修案件
             modelBuilder.Entity<RepairCase>().HasData(
@@ -151,7 +253,7 @@ namespace MachineManagementSystemVer2.Data
                     CaseStatus = "OPEN",
                     OccurredAt = new DateTime(2024, 09, 01),
                     DeviceId = 1,
-                    EmployeeId = 1,
+                    EmployeeId = "1",
                 },
                 new RepairCase
                 {
@@ -163,7 +265,7 @@ namespace MachineManagementSystemVer2.Data
                     CaseStatus = "暫置",
                     OccurredAt = new DateTime(2024, 09, 02),
                     DeviceId = 2,
-                    EmployeeId = 2,
+                    EmployeeId = "2",
                 },
                 new RepairCase
                 {
@@ -175,7 +277,7 @@ namespace MachineManagementSystemVer2.Data
                     CaseStatus = "CLOSE",
                     OccurredAt = new DateTime(2024, 09, 03),
                     DeviceId = 3,
-                    EmployeeId = 3,
+                    EmployeeId = "3",
                 }
 
             );

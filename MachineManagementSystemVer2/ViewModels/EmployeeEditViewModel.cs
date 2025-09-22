@@ -5,7 +5,7 @@ namespace MachineManagementSystemVer2.ViewModels
 {
     public class EmployeeEditViewModel
     {
-        public int EmployeeId { get; set; }
+        public string EmployeeId { get; set; }
 
         [Required(ErrorMessage = "姓名為必填")]
         [StringLength(50)]

@@ -24,7 +24,7 @@ namespace MachineManagementSystemVer2.Models
         public DateTime ChangedAt { get; set; } = DateTime.Now;
 
         [Required]
-        public int EmployeeId { get; set; }
+        public string EmployeeId { get; set; }
 
         [ForeignKey("EmployeeId")]
         public Employee Employee { get; set; }

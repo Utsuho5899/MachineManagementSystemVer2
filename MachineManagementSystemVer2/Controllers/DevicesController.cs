@@ -27,60 +27,68 @@ namespace MachineManagementSystemVer2.Controllers
             string searchModel)
         {
             // --- 排序參數設定 ---
+            ViewData["CurrentSort"] = sortOrder;
             ViewData["CustomerSortParm"] = string.IsNullOrEmpty(sortOrder) ? "customer_desc" : "";
             ViewData["PlantSortParm"] = sortOrder == "plant_asc" ? "plant_desc" : "plant_asc";
             ViewData["ModelSortParm"] = sortOrder == "model_asc" ? "model_desc" : "model_asc";
 
-            // --- 篩選參數設定 (用於在搜尋後保留輸入值) ---
-            ViewData["CurrentFilterCustomer"] = searchCustomer;
-            ViewData["CurrentFilterPlant"] = searchPlant;
-            ViewData["CurrentFilterModel"] = searchModel;
-
-            // --- 查詢邏輯 ---
-            var devices = from d in _context.Devices
-                                .Include(d => d.Plant)
-                                .ThenInclude(p => p.Customer)
-                          select d;
+            var devicesQuery = _context.Devices
+                                       .Include(d => d.Plant)
+                                       .ThenInclude(p => p.Customer)
+                                       .AsQueryable();
 
             // 1. 篩選 (Filtering)
             if (!string.IsNullOrEmpty(searchCustomer))
             {
-                devices = devices.Where(d => d.Plant.Customer.CustomerName.Contains(searchCustomer));
+                devicesQuery = devicesQuery.Where(d => d.Plant.Customer.CustomerName.Contains(searchCustomer));
             }
             if (!string.IsNullOrEmpty(searchPlant))
             {
-                devices = devices.Where(d => d.Plant.PlantName.Contains(searchPlant));
+                devicesQuery = devicesQuery.Where(d => d.Plant.PlantName.Contains(searchPlant));
             }
             if (!string.IsNullOrEmpty(searchModel))
             {
-                devices = devices.Where(d => d.DeviceModel.Contains(searchModel));
+                devicesQuery = devicesQuery.Where(d => d.DeviceModel.Contains(searchModel));
             }
 
             // 2. 排序 (Sorting)
             switch (sortOrder)
             {
                 case "customer_desc":
-                    devices = devices.OrderByDescending(d => d.Plant.Customer.CustomerName);
+                    devicesQuery = devicesQuery.OrderByDescending(d => d.Plant.Customer.CustomerName);
                     break;
                 case "plant_asc":
-                    devices = devices.OrderBy(d => d.Plant.PlantName);
+                    devicesQuery = devicesQuery.OrderBy(d => d.Plant.PlantName);
                     break;
                 case "plant_desc":
-                    devices = devices.OrderByDescending(d => d.Plant.PlantName);
+                    devicesQuery = devicesQuery.OrderByDescending(d => d.Plant.PlantName);
                     break;
                 case "model_asc":
-                    devices = devices.OrderBy(d => d.DeviceModel);
+                    devicesQuery = devicesQuery.OrderBy(d => d.DeviceModel);
                     break;
                 case "model_desc":
-                    devices = devices.OrderByDescending(d => d.DeviceModel);
+                    devicesQuery = devicesQuery.OrderByDescending(d => d.DeviceModel);
                     break;
                 default: // 預設排序
-                    devices = devices.OrderBy(d => d.Plant.Customer.CustomerName);
+                    devicesQuery = devicesQuery.OrderBy(d => d.Plant.Customer.CustomerName);
                     break;
             }
 
-            return View(await devices.ToListAsync());
-        }
+            var viewModel = new DeviceIndexViewModel
+            {
+                Devices = await devicesQuery.ToListAsync(),
+                SearchCustomer = searchCustomer,
+                SearchPlant = searchPlant,
+                SearchModel = searchModel
+            };
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_DevicesTablePartial", viewModel);
+            }
+
+            return View(viewModel);
+        }        
 
         // GET: Devices/Details/5
         public async Task<IActionResult> Details(int? id)

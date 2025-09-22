@@ -1,0 +1,101 @@
+﻿@model MachineManagementSystemVer2.ViewModels.RepairCaseIndexViewModel
+
+ <table class="table table-hover">
+    <thead>
+        <tr>
+            <th>案件No.</th>
+            <th>案件標題</th>
+            <th>
+                <a class="sort-link" asp-action="Index" asp-route-sortOrder="@ViewData["StatusSortParm"]" asp-route-searchStatus="@Model.SearchStatus" asp-route-searchEmployeeId="@Model.SearchEmployeeId" asp-route-searchStartDate="@Model.SearchStartDate?.ToString("yyyy-MM-dd")" asp-route-searchEndDate="@Model.SearchEndDate?.ToString("yyyy-MM-dd")">
+                    狀態
+                    <span class="arrow @(ViewData["CurrentSort"]?.ToString().Contains("status_") ?? false ? "active" : "")">
+                        <i class="fas @(ViewData["CurrentSort"] as string == "status_asc" ? "fa-sort-up" : (ViewData["CurrentSort"] as string == "status_desc" ? "fa-sort-down" : "fa-sort"))"></i>
+                    </span>
+                </a>
+            </th>
+            <th>
+                <a class="sort-link" asp-action="Index" asp-route-sortOrder="@ViewData["CustomerSortParm"]" asp-route-searchStatus="@Model.SearchStatus" asp-route-searchEmployeeId="@Model.SearchEmployeeId" asp-route-searchStartDate="@Model.SearchStartDate?.ToString("yyyy-MM-dd")" asp-route-searchEndDate="@Model.SearchEndDate?.ToString("yyyy-MM-dd")">
+                    客戶名稱
+                    <span class="arrow @(ViewData["CurrentSort"]?.ToString().Contains("customer_") ?? false ? "active" : "")">
+                        <i class="fas @(ViewData["CurrentSort"] as string == "customer_asc" ? "fa-sort-up" : (ViewData["CurrentSort"] as string == "customer_desc" ? "fa-sort-down" : "fa-sort"))"></i>
+                    </span>
+                </a>
+            </th>
+            <th>
+                <a class="sort-link" asp-action="Index" asp-route-sortOrder="@ViewData["PlantSortParm"]" asp-route-searchStatus="@Model.SearchStatus" asp-route-searchEmployeeId="@Model.SearchEmployeeId" asp-route-searchStartDate="@Model.SearchStartDate?.ToString("yyyy-MM-dd")" asp-route-searchEndDate="@Model.SearchEndDate?.ToString("yyyy-MM-dd")">
+                    廠區
+                    <span class="arrow @(ViewData["CurrentSort"]?.ToString().Contains("plant_") ?? false ? "active" : "")">
+                        <i class="fas @(ViewData["CurrentSort"] as string == "plant_asc" ? "fa-sort-up" : (ViewData["CurrentSort"] as string == "plant_desc" ? "fa-sort-down" : "fa-sort"))"></i>
+                    </span>
+                </a>
+            </th>
+            <th>
+                <a class="sort-link" asp-action="Index" asp-route-sortOrder="@ViewData["DeviceSortParm"]" asp-route-searchStatus="@Model.SearchStatus" asp-route-searchEmployeeId="@Model.SearchEmployeeId" asp-route-searchStartDate="@Model.SearchStartDate?.ToString("yyyy-MM-dd")" asp-route-searchEndDate="@Model.SearchEndDate?.ToString("yyyy-MM-dd")">
+                    設備
+                    <span class="arrow @(ViewData["CurrentSort"]?.ToString().Contains("device_") ?? false ? "active" : "")">
+                        <i class="fas @(ViewData["CurrentSort"] as string == "device_asc" ? "fa-sort-up" : (ViewData["CurrentSort"] as string == "device_desc" ? "fa-sort-down" : "fa-sort"))"></i>
+                    </span>
+                </a>
+            </th>
+            <th>
+                <a class="sort-link" asp-action="Index" asp-route-sortOrder="@ViewData["LineSortParm"]" asp-route-searchStatus="@Model.SearchStatus" asp-route-searchEmployeeId="@Model.SearchEmployeeId" asp-route-searchStartDate="@Model.SearchStartDate?.ToString("yyyy-MM-dd")" asp-route-searchEndDate="@Model.SearchEndDate?.ToString("yyyy-MM-dd")">
+                    客戶產線代稱
+                    <span class="arrow @(ViewData["CurrentSort"]?.ToString().Contains("line_") ?? false ? "active" : "")">
+                        <i class="fas @(ViewData["CurrentSort"] as string == "line_asc" ? "fa-sort-up" : (ViewData["CurrentSort"] as string == "line_desc" ? "fa-sort-down" : "fa-sort"))"></i>
+                    </span>
+                </a>
+            </th>
+            <th>
+                <a class="sort-link" asp-action="Index" asp-route-sortOrder="@ViewData["EmployeeSortParm"]" asp-route-searchStatus="@Model.SearchStatus" asp-route-searchEmployeeId="@Model.SearchEmployeeId" asp-route-searchStartDate="@Model.SearchStartDate?.ToString("yyyy-MM-dd")" asp-route-searchEndDate="@Model.SearchEndDate?.ToString("yyyy-MM-dd")">
+                    建單人員
+                    <span class="arrow @(ViewData["CurrentSort"]?.ToString().Contains("employee_") ?? false ? "active" : "")">
+                        <i class="fas @(ViewData["CurrentSort"] as string == "employee_asc" ? "fa-sort-up" : (ViewData["CurrentSort"] as string == "employee_desc" ? "fa-sort-down" : "fa-sort"))"></i>
+                    </span>
+                </a>
+            </th>
+            <th>
+                <a class="sort-link" asp-action="Index" asp-route-sortOrder="@ViewData["DateSortParm"]" asp-route-searchStatus="@Model.SearchStatus" asp-route-searchEmployeeId="@Model.SearchEmployeeId" asp-route-searchStartDate="@Model.SearchStartDate?.ToString("yyyy-MM-dd")" asp-route-searchEndDate="@Model.SearchEndDate?.ToString("yyyy-MM-dd")">
+                    發生時間
+                    <span class="arrow @(string.IsNullOrEmpty(ViewData["CurrentSort"] as string) || (ViewData["CurrentSort"]?.ToString().Contains("date_") ?? false) ? "active" : "")">
+                        <i class="fas @(ViewData["CurrentSort"] as string == "date_asc" ? "fa-sort-up" : "fa-sort-down")"></i>
+                    </span>
+                </a>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.FilteredCases)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.RepairCaseId)</td>
+                <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                <td>
+                    @{
+                        var statusBadgeClass = "bg-secondary";
+                        switch (item.CaseStatus)
+                        {
+                            case "OPEN": statusBadgeClass = "bg-danger"; break;
+                            case "CLOSE": statusBadgeClass = "bg-success"; break;
+                            case "暫置": statusBadgeClass = "bg-warning text-dark"; break;
+                        }
+                    }
+                    <span class="badge @statusBadgeClass">@item.CaseStatus</span>
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.Plant.Customer.CustomerName)</td>
+                <td>@Html.DisplayFor(modelItem => item.Plant.PlantName)</td>
+                <td>@Html.DisplayFor(modelItem => item.Device.DeviceModel)</td>
+                <td>@Html.DisplayFor(modelItem => item.Device.ProductionLine)</td>
+                <td>@Html.DisplayFor(modelItem => item.Employee.EmployeeName)</td>
+                <td>@item.OccurredAt.ToString("yyyy/MM/dd")</td>
+                <td>
+                    <a asp-controller="RepairCases" asp-action="Details" asp-route-id="@item.RepairCaseId" class="btn btn-sm btn-outline-info">檢視詳情</a>
+                    @if (User.IsInRole("Manager") || User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="RepairCases" asp-action="Delete" asp-route-id="@item.RepairCaseId" class="btn btn-sm btn-outline-danger">刪除</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table> 

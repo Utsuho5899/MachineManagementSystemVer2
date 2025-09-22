@@ -13,7 +13,7 @@ namespace MachineManagementSystemVer2.ViewModels
         public string? SearchStatus { get; set; }
 
         [Display(Name = "處理人員")]
-        public int? SearchEmployeeId { get; set; }
+        public string? SearchEmployeeId { get; set; }
 
         [Display(Name = "起始日期")]
         public DateTime? SearchStartDate { get; set; }
@@ -32,5 +32,16 @@ namespace MachineManagementSystemVer2.ViewModels
         public int TotalCount { get; set; }
         public int OpenCount { get; set; }
         public int ClosedCount { get; set; }
-    }
+
+        public Dictionary<string, string> ToRouteDictionary(string sortOrderToRemove)
+        {
+            return new Dictionary<string, string>
+    {
+        { "searchStatus", SearchStatus },
+        { "searchEmployeeId", SearchEmployeeId?.ToString() },
+        { "searchStartDate", SearchStartDate?.ToString("yyyy-MM-dd") },
+        { "searchEndDate", SearchEndDate?.ToString("yyyy-MM-dd") }
+    };
+        }
+    };
 }

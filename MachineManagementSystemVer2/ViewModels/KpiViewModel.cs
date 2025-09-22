@@ -13,7 +13,7 @@ namespace MachineManagementSystemVer2.ViewModels
         public string? SearchStatus { get; set; }
 
         [Display(Name = "特定工程師")]
-        public int? SearchEmployeeId { get; set; }
+        public string? SearchEmployeeId { get; set; }
 
         [Display(Name = "起始日期")]
         public DateTime? SearchStartDate { get; set; }
